@@ -1,2 +1,3 @@
-# core
-Another useless NodeJS framework
+# @swarmjs/core
+
+Another useless NodeJS framework.
