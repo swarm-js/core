@@ -13,4 +13,5 @@ export interface SwarmMethod {
   accepts: any | null
   returns: SwarmReturn[]
   parameters: SwarmParameter[]
+  version: string[]
 }

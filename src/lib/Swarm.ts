@@ -5,21 +5,36 @@ import fastify, {
   HTTPMethods
 } from 'fastify'
 import { SwarmController, SwarmMethod, SwarmOptions } from './interfaces'
+import { SwarmMonitorData } from './interfaces/SwarmMonitorData'
 import { createFullRoute } from './tools/path'
+import dayjs from 'dayjs'
+import Monitoring from './controllers/Monitoring'
+import { checkAccess } from './tools/acl'
+
+declare module 'fastify' {
+  interface FastifyRequest {
+    // you must reference the interface and not the type
+    userAccess: string[]
+  }
+}
 
 export class Swarm {
   private controllers: SwarmController[] = []
   private options: SwarmOptions = {
     logLevel: 'error',
     documentationPath: '/swagger.json',
-    documentationAccess: (_: FastifyRequest) => true,
+    documentationAccess: [],
     getUserAccess: (_: FastifyRequest) => [],
     monitor: false,
-    monitorAccess: (_: FastifyRequest) => true,
+    monitorAccess: [],
     prefix: '/',
     schemasFolder: 'schemas'
   }
   private fastifyInstance: FastifyInstance | null = null
+  private monitorData: Map<string, SwarmMonitorData> = new Map<
+    string,
+    SwarmMonitorData
+  >()
 
   constructor(conf: Partial<SwarmOptions>) {
     this.options = {
@@ -27,6 +42,15 @@ export class Swarm {
       ...conf
     }
     this.fastifyInstance = fastify({})
+    Monitoring.init(this)
+  }
+
+  getOptions() {
+    return this.options
+  }
+
+  getMonitorData() {
+    return this.monitorData.values()
   }
 
   private log(level: string, content: any) {
@@ -72,7 +96,8 @@ export class Swarm {
       access: null,
       accepts: null,
       returns: [],
-      parameters: []
+      parameters: [],
+      version: ['v1']
     }
 
     // Apply method options
@@ -91,6 +116,13 @@ export class Swarm {
     if (prototype.description !== undefined) {
       ret.description = prototype.description
       this.log('debug', `${name}: found description: ${ret.description}`)
+    }
+    if (prototype.version !== undefined) {
+      ret.version = prototype.version
+      this.log(
+        'debug',
+        `${name}: found version: ${JSON.stringify(ret.version)}`
+      )
     }
     if (prototype.access !== undefined) {
       ret.access = prototype.access
@@ -142,7 +174,8 @@ export class Swarm {
       methods: [],
       title: null,
       description: null,
-      prefix: '/'
+      prefix: '/',
+      version: ['v1']
     }
 
     this.log('debug', `Reading ${ret.name} controller`)
@@ -159,6 +192,13 @@ export class Swarm {
     if (controller.prototype.swarm?.prefix !== undefined) {
       ret.prefix = controller.prototype.swarm.prefix
       this.log('debug', `${ret.name}: found prefix : ${ret.prefix}`)
+    }
+    if (controller.prototype.swarm?.version !== undefined) {
+      ret.version = controller.prototype.swarm.version
+      this.log(
+        'debug',
+        `${ret.name}: found version : ${JSON.stringify(ret.version)}`
+      )
     }
 
     this.log('debug', `${ret.name}: reading methods`)
@@ -196,12 +236,52 @@ export class Swarm {
   }
 
   private saveMonitorData(
-    controllerName: string,
-    methodName: string,
+    controller: SwarmController,
+    method: SwarmMethod,
     duration: number
   ) {
     if (!this.options.monitor) return
-    console.log(controllerName, methodName, duration)
+
+    let data: SwarmMonitorData | undefined = this.monitorData.get(
+      `${controller.name}@${method.name}`
+    )
+    if (data === undefined)
+      data = {
+        controllerName: controller.name,
+        methodName: method.name,
+        method: method.method,
+        path: method.fullRoute,
+        calls: 0,
+        totalDuration: 0,
+        minDuration: null,
+        maxDuration: null,
+        perDay: {}
+      }
+    data.calls++
+    data.totalDuration += duration
+    if (data.minDuration === null || data.minDuration > duration)
+      data.minDuration = duration
+    if (data.maxDuration === null || data.maxDuration < duration)
+      data.maxDuration = duration
+
+    const today = dayjs().format('YYYY-MM-DD')
+    if (data.perDay[today] === undefined)
+      data.perDay[today] = {
+        calls: 0,
+        totalDuration: 0,
+        minDuration: null,
+        maxDuration: null
+      }
+    data.perDay[today].calls++
+    data.perDay[today].totalDuration += duration
+    if (data.minDuration === null || data.perDay[today].minDuration > duration)
+      data.perDay[today].minDuration = duration
+    if (
+      data.perDay[today].maxDuration === null ||
+      data.perDay[today].maxDuration < duration
+    )
+      data.perDay[today].maxDuration = duration
+    this.monitorData.set(`${controller.name}@${method.name}`, data)
   }
 
   private createHandlerForMethod(
@@ -209,10 +289,16 @@ export class Swarm {
     method: SwarmMethod
   ) {
     return async (request: FastifyRequest, reply: FastifyReply) => {
+      request.userAccess = []
+      if (this.options.getUserAccess)
+        request.userAccess = await this.options.getUserAccess(request)
+
+      if (method.access !== null) checkAccess(request, method.access)
+
       const startDate = +new Date()
       const response = await method.instance(request, reply)
       const endDate = +new Date()
-      this.saveMonitorData(controller.name, method.name, endDate - startDate)
+      this.saveMonitorData(controller, method, endDate - startDate)
       return response
     }
   }
@@ -221,19 +307,26 @@ export class Swarm {
     // Register routes
     if (this.fastifyInstance === null) return
 
+    // Add monitor route
+    if (this.options.monitor) {
+      this.addController(Monitoring)
+    }
+
     for (const controller of this.controllers) {
       this.log('debug', `Adding routes for ${controller.name}`)
 
       for (const method of controller.methods) {
-        this.fastifyInstance.route({
-          method: <HTTPMethods>method.method,
-          url: method.fullRoute,
-          handler: this.createHandlerForMethod(controller, method)
-        })
-        this.log(
-          'info',
-          `Added route for ${controller.name}@${method.name}: ${method.method} ${method.fullRoute}`
-        )
+        for (let version of method.version) {
+          this.fastifyInstance.route({
+            method: <HTTPMethods>method.method,
+            url: `/api/${version}${method.fullRoute}`,
+            handler: this.createHandlerForMethod(controller, method)
+          })
+          this.log(
+            'info',
+            `Added route for ${controller.name}@${method.name}: ${method.method} /api/${version}${method.fullRoute}`
+          )
+        }
       }
     }
 

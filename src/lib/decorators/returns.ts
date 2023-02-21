@@ -2,7 +2,7 @@ import { SwarmReturn } from '../interfaces'
 
 export function returns (
   code: number | string,
-  schema: string,
+  schema: any,
   description: string = ''
 ): any {
   return (target: any, propertyKey: string): void => {

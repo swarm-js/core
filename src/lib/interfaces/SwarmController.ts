@@ -7,4 +7,5 @@ export interface SwarmController {
   title: string | null
   description: string | null
   prefix: string
+  version: string[]
 }

@@ -1,5 +1,5 @@
 export interface SwarmParameter {
   name: string
-  schema: string
+  schema: any
   description: string
 }
