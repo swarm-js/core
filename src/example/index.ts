@@ -29,7 +29,9 @@ class UsersController {
   }
 }
 
-const app = new Swarm({})
+const app = new Swarm({
+  logLevel: 'debug'
+})
 
 app.addController(UsersController)
 

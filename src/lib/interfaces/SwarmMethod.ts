@@ -4,6 +4,7 @@ import { SwarmReturn } from './SwarmReturn'
 export interface SwarmMethod {
   name: string
   instance: any
+  fullRoute: string
   method: string | null
   route: string | null
   title: string | null

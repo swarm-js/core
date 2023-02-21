@@ -1,4 +1,5 @@
 export interface SwarmOptions {
+  logLevel: string
   documentationPath: string
   documentationAccess: any
   getUserAccess: any
