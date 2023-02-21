@@ -1,5 +1,5 @@
 export interface SwarmReturn {
-  code: number
+  code: number | string
   schema: string
   description: string
 }
