@@ -305,7 +305,7 @@ export class Swarm {
     }
   }
 
-  async listen(port: number = 3000) {
+  async listen(port: number = 3000, host: string = '0.0.0.0') {
     // Register routes
     if (this.fastifyInstance === null) return
 
@@ -342,10 +342,10 @@ export class Swarm {
     }
 
     try {
-      await this.fastifyInstance.listen({ port })
-      this.log('info', `Listening to port ${port}`)
+      await this.fastifyInstance.listen({ port, host })
+      this.log('info', `Listening to ${host}:${port}`)
     } catch (err) {
-      console.log(`Cannot listen on port ${port}: ${getErrorMessage(err)}`)
+      console.log(`Cannot listen to ${host}:${port}: ${getErrorMessage(err)}`)
       process.exit(1)
     }
   }
