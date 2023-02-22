@@ -10,6 +10,7 @@ import { createFullRoute } from './tools/path'
 import dayjs from 'dayjs'
 import Monitoring from './controllers/Monitoring'
 import { checkAccess } from './tools/acl'
+import { createUserAccessMiddleware } from './middlewares/populateUserAccess'
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -51,6 +52,10 @@ export class Swarm {
 
   getMonitorData() {
     return this.monitorData.values()
+  }
+
+  get fastify() {
+    return this.fastifyInstance
   }
 
   private log(level: string, content: any) {
@@ -289,10 +294,6 @@ export class Swarm {
     method: SwarmMethod
   ) {
     return async (request: FastifyRequest, reply: FastifyReply) => {
-      request.userAccess = []
-      if (this.options.getUserAccess)
-        request.userAccess = await this.options.getUserAccess(request)
-
       if (method.access !== null) checkAccess(request, method.access)
 
       const startDate = +new Date()
@@ -306,6 +307,15 @@ export class Swarm {
   async listen(port: number = 3000) {
     // Register routes
     if (this.fastifyInstance === null) return
+
+    // Decorate fastify instance to handle ACL
+    this.fastifyInstance.decorateRequest('userAccess', function () {
+      return []
+    })
+    this.fastifyInstance.addHook(
+      'preHandler',
+      createUserAccessMiddleware(this.options.getUserAccess)
+    )
 
     // Add monitor route
     if (this.options.monitor) {
@@ -330,6 +340,14 @@ export class Swarm {
       }
     }
 
-    console.log(`Listening to port ${port}`)
+    try {
+      await this.fastifyInstance.listen({ port })
+      this.log('info', `Listening to port ${port}`)
+    } catch (err) {
+      let message = 'Unknown error'
+      if (err instanceof Error) message = err.message
+      console.log(`Cannot listen on port ${port}: ${message}`)
+      process.exit(1)
+    }
   }
 }
