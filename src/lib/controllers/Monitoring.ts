@@ -30,7 +30,7 @@ export default class Monitoring {
     'Method name as in controller@method. Use "all" to retrieve global statistics.'
   )
   static async getStats (request: any) {
-    checkAccess(request, swarm.getOptions().monitorAccess)
+    checkAccess(request, swarm.options.monitorAccess)
 
     const days: number = +(request.query.days ?? 30)
     const minDate: string = dayjs().subtract(days, 'days').format('YYYY-MM-DD')

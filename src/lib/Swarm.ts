@@ -12,6 +12,7 @@ import Monitoring from './controllers/Monitoring'
 import { checkAccess } from './tools/acl'
 import { createUserAccessMiddleware } from './middlewares/populateUserAccess'
 import { getErrorMessage } from './tools/error'
+import Swagger from './controllers/Swagger'
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -21,10 +22,9 @@ declare module 'fastify' {
 }
 
 export class Swarm {
-  private controllers: SwarmController[] = []
-  private options: SwarmOptions = {
+  controllers: SwarmController[] = []
+  options: SwarmOptions = {
     logLevel: 'error',
-    documentationPath: '/swagger.json',
     documentationAccess: [],
     getUserAccess: (_: FastifyRequest) => [],
     monitor: false,
@@ -45,10 +45,7 @@ export class Swarm {
     }
     this.fastifyInstance = fastify({})
     Monitoring.init(this)
-  }
-
-  getOptions() {
-    return this.options
+    Swagger.init(this)
   }
 
   getMonitorData() {
@@ -181,6 +178,7 @@ export class Swarm {
       title: null,
       description: null,
       prefix: '/',
+      root: false,
       version: ['v1']
     }
 
@@ -205,6 +203,10 @@ export class Swarm {
         'debug',
         `${ret.name}: found version : ${JSON.stringify(ret.version)}`
       )
+    }
+    if (controller.prototype.swarm?.root !== undefined) {
+      ret.root = controller.prototype.swarm.root
+      this.log('debug', `${ret.name}: found root : ${ret.root ? 'Yes' : 'no'}`)
     }
 
     this.log('debug', `${ret.name}: reading methods`)
@@ -318,6 +320,8 @@ export class Swarm {
       createUserAccessMiddleware(this.options.getUserAccess)
     )
 
+    this.addController(Swagger)
+
     // Add monitor route
     if (this.options.monitor) {
       this.addController(Monitoring)
@@ -330,12 +334,16 @@ export class Swarm {
         for (let version of method.version) {
           this.fastifyInstance.route({
             method: <HTTPMethods>method.method,
-            url: `/api/${version}${method.fullRoute}`,
+            url: controller.root
+              ? method.fullRoute
+              : `/${version}${method.fullRoute}`,
             handler: this.createHandlerForMethod(controller, method)
           })
           this.log(
             'info',
-            `Added route for ${controller.name}@${method.name}: ${method.method} /api/${version}${method.fullRoute}`
+            `Added route for ${controller.name}@${method.name}: ${
+              method.method
+            } ${controller.root ? '' : '/' + version}${method.fullRoute}`
           )
         }
       }
