@@ -4,7 +4,14 @@ import fastify, {
   FastifyRequest,
   HTTPMethods
 } from 'fastify'
-import { SwarmController, SwarmMethod, SwarmOptions } from './interfaces'
+import {
+  SwarmController,
+  SwarmMethod,
+  SwarmOptions,
+  SwarmParameter,
+  SwarmQuery,
+  SwarmReturn
+} from './interfaces'
 import { SwarmMonitorData } from './interfaces/SwarmMonitorData'
 import { createFullRoute } from './tools/path'
 import dayjs from 'dayjs'
@@ -13,6 +20,9 @@ import { checkAccess } from './tools/acl'
 import { createUserAccessMiddleware } from './middlewares/populateUserAccess'
 import { getErrorMessage } from './tools/error'
 import Swagger from './controllers/Swagger'
+import fs from 'fs/promises'
+import path from 'path'
+const main = require('require-main-filename')()
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -30,13 +40,14 @@ export class Swarm {
     monitor: false,
     monitorAccess: [],
     prefix: '/',
-    schemasFolder: 'schemas'
+    schemasFolder: './schemas'
   }
   private fastifyInstance: FastifyInstance | null = null
   private monitorData: Map<string, SwarmMonitorData> = new Map<
     string,
     SwarmMonitorData
   >()
+  private schemas: any = {}
 
   constructor(conf: Partial<SwarmOptions>) {
     this.options = {
@@ -82,6 +93,41 @@ export class Swarm {
     console.log(`[Swarm][${level}]`, content)
   }
 
+  private async loadSchema(path: string, name: string) {
+    try {
+      const content: string = await fs.readFile(path, { encoding: 'utf8' })
+      this.schemas[name] = JSON.parse(content)
+      this.log('info', `Found schema ${name}`)
+      const fastifySchema = JSON.parse(content)
+      fastifySchema.$id = name
+      this.fastifyInstance?.addSchema(fastifySchema)
+    } catch {}
+  }
+
+  private async loadSchemas(dir: string, prefix: string = ''): Promise<void> {
+    try {
+      const files = await fs.readdir(dir)
+      for (let file of files) {
+        const filepath: string = path.join(dir, file)
+        const stat = await fs.lstat(filepath)
+        if (stat.isFile() && file.substring(file.length - 5) === '.json')
+          await this.loadSchema(
+            filepath,
+            `${prefix.length ? prefix + '/' : ''}${file.substring(
+              0,
+              file.length - 5
+            )}`
+          )
+        else if (stat.isDirectory()) {
+          await this.loadSchemas(
+            filepath,
+            `${prefix}${prefix.length ? '/' : ''}${file}`
+          )
+        }
+      }
+    } catch {}
+  }
+
   private parseMethod(
     controller: any,
     name: string,
@@ -100,6 +146,7 @@ export class Swarm {
       accepts: null,
       returns: [],
       parameters: [],
+      query: [],
       version: ['v1']
     }
 
@@ -153,6 +200,13 @@ export class Swarm {
       this.log(
         'debug',
         `${name}: found parameters: ${JSON.stringify(ret.parameters, null, 4)}`
+      )
+    }
+    if (prototype.query !== undefined) {
+      ret.query = prototype.query
+      this.log(
+        'debug',
+        `${name}: found query: ${JSON.stringify(ret.query, null, 4)}`
       )
     }
 
@@ -307,9 +361,105 @@ export class Swarm {
     }
   }
 
+  private generateSchema(method: SwarmMethod): any {
+    const schema: any = {}
+
+    if (method.accepts !== null) {
+      let accepts = method.accepts
+      if (accepts instanceof Array === false) accepts = [accepts]
+      accepts = accepts
+        .map((name: string) => this.schemas[name])
+        .filter((s: any) => s !== undefined)
+
+      switch (accepts.length) {
+        case 0:
+          break
+        case 1:
+          schema.body = accepts[0]
+          break
+        default:
+          schema.body = {
+            anyOf: accepts
+          }
+          break
+      }
+    }
+
+    const params = method.parameters
+      .map((param: SwarmParameter) => [
+        param.name,
+        typeof param.schema === 'string'
+          ? this.schemas[param.schema]
+          : param.schema
+      ])
+      .filter(a => a[1] !== undefined)
+    if (params.length)
+      schema.params = {
+        type: 'object',
+        properties: Object.fromEntries(params)
+      }
+
+    const queries = method.query
+      .map((query: SwarmQuery) => [
+        query.name,
+        typeof query.schema === 'string'
+          ? this.schemas[query.schema]
+          : query.schema
+      ])
+      .filter(a => a[1] !== undefined)
+    if (queries.length)
+      schema.querystring = {
+        type: 'object',
+        properties: Object.fromEntries(queries)
+      }
+
+    const returns = method.returns
+      .map((ret: SwarmReturn) => [
+        ret.code,
+        typeof ret.schema === 'string' ? this.schemas[ret.schema] : ret.schema
+      ])
+      .filter(a => a[1] !== undefined)
+    if (returns.length) schema.response = Object.fromEntries(returns)
+
+    return schema
+  }
+
+  private registerControllers(): void {
+    if (this.fastifyInstance === null) return
+
+    for (const controller of this.controllers) {
+      this.log('debug', `Adding routes for ${controller.name}`)
+
+      for (const method of controller.methods) {
+        for (let version of method.version) {
+          const schema: any = this.generateSchema(method)
+
+          this.fastifyInstance.route({
+            method: <HTTPMethods>method.method,
+            url: controller.root
+              ? method.fullRoute
+              : `/${version}${method.fullRoute}`,
+            schema,
+            handler: this.createHandlerForMethod(controller, method)
+          })
+          this.log(
+            'info',
+            `Added route for ${controller.name}@${method.name}: ${
+              method.method
+            } ${controller.root ? '' : '/' + version}${method.fullRoute}`
+          )
+        }
+      }
+    }
+  }
+
   async listen(port: number = 3000, host: string = '0.0.0.0') {
     // Register routes
     if (this.fastifyInstance === null) return
+
+    await this.loadSchemas(
+      path.join(path.dirname(main), this.options.schemasFolder)
+    )
 
     // Decorate fastify instance to handle ACL
     this.fastifyInstance.decorateRequest('userAccess', function () {
@@ -327,27 +477,7 @@ export class Swarm {
       this.addController(Monitoring)
     }
 
-    for (const controller of this.controllers) {
-      this.log('debug', `Adding routes for ${controller.name}`)
-
-      for (const method of controller.methods) {
-        for (let version of method.version) {
-          this.fastifyInstance.route({
-            method: <HTTPMethods>method.method,
-            url: controller.root
-              ? method.fullRoute
-              : `/${version}${method.fullRoute}`,
-            handler: this.createHandlerForMethod(controller, method)
-          })
-          this.log(
-            'info',
-            `Added route for ${controller.name}@${method.name}: ${
-              method.method
-            } ${controller.root ? '' : '/' + version}${method.fullRoute}`
-          )
-        }
-      }
-    }
+    this.registerControllers()
 
     try {
       await this.fastifyInstance.listen({ port, host })

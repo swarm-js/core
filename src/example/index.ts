@@ -30,7 +30,7 @@ class UsersController {
 }
 
 const app = new Swarm({
-  logLevel: 'debug',
+  logLevel: 'info',
   monitor: true
 })
 

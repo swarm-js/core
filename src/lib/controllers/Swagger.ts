@@ -15,6 +15,24 @@ export default class Swagger {
   static async getSwaggerFile (request: FastifyRequest) {
     checkAccess(request, swarm.options.documentationAccess)
 
+    /**
+     * $ref : when using shared schema in fastify, user can use the following syntax:
+     *
+     * {
+     *   $ref: 'MySchema#/properties/foo'
+     * }
+     *
+     * For Swagger, we need to transform them into :
+     *
+     * {
+     *   $ref: '#/components/MySchema/properties/foo
+     * }
+     *
+     * And we'll embed every single shared schema in components.
+     *
+     * (NB: for schema names, replace / by _)
+     */
+
     return {
       implemented: false
     }

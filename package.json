@@ -1,6 +1,6 @@
 {
   "name": "@swarmjs/core",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Another useless NodeJS framework.",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
@@ -45,7 +45,8 @@
     "@types/http-errors": "^2.0.1",
     "dayjs": "^1.11.7",
     "fastify": "^4.13.0",
-    "http-errors": "^2.0.0"
+    "http-errors": "^2.0.0",
+    "require-main-filename": "^2.0.0"
   },
   "devDependencies": {
     "@ava/typescript": "^1.1.1",
