@@ -11,6 +11,7 @@ import dayjs from 'dayjs'
 import Monitoring from './controllers/Monitoring'
 import { checkAccess } from './tools/acl'
 import { createUserAccessMiddleware } from './middlewares/populateUserAccess'
+import { getErrorMessage } from './tools/error'
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -344,9 +345,7 @@ export class Swarm {
       await this.fastifyInstance.listen({ port })
       this.log('info', `Listening to port ${port}`)
     } catch (err) {
-      let message = 'Unknown error'
-      if (err instanceof Error) message = err.message
-      console.log(`Cannot listen on port ${port}: ${message}`)
+      console.log(`Cannot listen on port ${port}: ${getErrorMessage(err)}`)
       process.exit(1)
     }
   }
