@@ -16,6 +16,19 @@ export class Schemas {
     this.swarm = instance
   }
 
+  getSwaggerComponents () {
+    return Object.fromEntries(
+      Object.entries(this.schemas).map((s: any) => [
+        s[0].replace(/\//g, '_'),
+        s[1]
+      ])
+    )
+  }
+
+  get (name: string) {
+    return this.schemas[name]
+  }
+
   async load (path: string, name: string) {
     try {
       const content: string = await fs.readFile(path, { encoding: 'utf8' })
@@ -55,11 +68,11 @@ export class Schemas {
     const schema: any = {}
 
     if (method.accepts !== null) {
-      let accepts = method.accepts
+      let accepts = method.accepts.schema
       if (accepts instanceof Array === false) accepts = [accepts]
-      accepts = accepts
-        .map((name: string) => this.schemas[name])
-        .filter((s: any) => s !== undefined)
+      accepts = accepts.map((a: any) =>
+        typeof a === 'string' ? { $ref: `${a}#` } : a
+      )
 
       switch (accepts.length) {
         case 0:
@@ -79,7 +92,7 @@ export class Schemas {
       .map((param: SwarmParameter) => [
         param.name,
         typeof param.schema === 'string'
-          ? this.schemas[param.schema]
+          ? { $ref: `${param.schema}#` }
           : param.schema
       ])
       .filter(a => a[1] !== undefined)
@@ -93,7 +106,7 @@ export class Schemas {
       .map((query: SwarmQuery) => [
         query.name,
         typeof query.schema === 'string'
-          ? this.schemas[query.schema]
+          ? { $ref: `${query.schema}#` }
           : query.schema
       ])
       .filter(a => a[1] !== undefined)
@@ -106,7 +119,7 @@ export class Schemas {
     const returns = method.returns
       .map((ret: SwarmReturn) => [
         ret.code,
-        typeof ret.schema === 'string' ? this.schemas[ret.schema] : ret.schema
+        typeof ret.schema === 'string' ? { $ref: `${ret.schema}#` } : ret.schema
       ])
       .filter(a => a[1] !== undefined)
     if (returns.length) schema.response = Object.fromEntries(returns)

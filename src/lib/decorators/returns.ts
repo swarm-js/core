@@ -3,7 +3,8 @@ import { SwarmReturn } from '../interfaces'
 export function returns (
   code: number | string,
   schema: any,
-  description: string = ''
+  description: string = '',
+  mimeType: string = 'application/json'
 ): any {
   return (target: any, propertyKey: string): void => {
     if (!propertyKey) return
@@ -23,7 +24,8 @@ export function returns (
     target.prototype.swarm.methods[propertyKey].returns.push({
       code,
       schema,
-      description
+      description,
+      mimeType
     })
   }
 }

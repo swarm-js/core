@@ -12,6 +12,10 @@ export class Controllers {
     this.swarm = instance
   }
 
+  get list() {
+    return this.controllers
+  }
+
   add(controller: any): void {
     const ret: SwarmController = {
       name: controller.prototype.constructor.name,
