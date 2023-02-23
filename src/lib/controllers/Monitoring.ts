@@ -7,16 +7,17 @@ import {
   route,
   title
 } from '../decorators'
+import { Swarm } from '../Swarm'
 import { checkAccess } from '../tools/acl'
 
-let swarm: any = null
+let swarm: Swarm
 let startDate: number | null = null
 
 @title('Monitoring')
 @description('Handles Swarm instance monitoring stats')
 @prefix('/__monitoring__')
 export default class Monitoring {
-  static init (swarmInstance: any) {
+  static init (swarmInstance: Swarm) {
     swarm = swarmInstance
     startDate = +new Date()
   }
@@ -48,7 +49,7 @@ export default class Monitoring {
       perDay: {}
     }
 
-    for (const item of swarm.getMonitorData()) {
+    for (const item of swarm.monitor.getData()) {
       if (
         request.params.filter !== 'all' &&
         request.params.filter !== `${item.controllerName}@${item.methodName}`
@@ -58,13 +59,15 @@ export default class Monitoring {
       ret.global.calls += item.calls
       ret.global.duration.avg += item.totalDuration
       if (
-        ret.global.duration.min === null ||
-        item.minDuration < ret.global.duration.min
+        item.minDuration !== null &&
+        (ret.global.duration.min === null ||
+          item.minDuration < ret.global.duration.min)
       )
         ret.global.duration.min = item.minDuration
       if (
-        ret.global.duration.max === null ||
-        item.maxDuration > ret.global.duration.max
+        item.maxDuration !== null &&
+        (ret.global.duration.max === null ||
+          item.maxDuration > ret.global.duration.max)
       )
         ret.global.duration.max = item.maxDuration
 
@@ -84,13 +87,15 @@ export default class Monitoring {
         ret.perDay[day].calls += item.calls
         ret.perDay[day].duration.avg += item.totalDuration
         if (
-          ret.perDay[day].duration.min === null ||
-          item.minDuration < ret.perDay[day].duration.min
+          item.minDuration !== null &&
+          (ret.perDay[day].duration.min === null ||
+            item.minDuration < ret.perDay[day].duration.min)
         )
           ret.perDay[day].duration.min = item.minDuration
         if (
-          ret.perDay[day].duration.max === null ||
-          item.maxDuration > ret.perDay[day].duration.max
+          item.maxDuration !== null &&
+          (ret.perDay[day].duration.max === null ||
+            item.maxDuration > ret.perDay[day].duration.max)
         )
           ret.perDay[day].duration.max = item.maxDuration
       }
