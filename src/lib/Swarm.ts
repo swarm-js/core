@@ -21,12 +21,28 @@ export class Swarm {
   private fastifyInstance: FastifyInstance
   options: SwarmOptions = {
     logLevel: 'error',
-    documentationAccess: [],
-    getUserAccess: (_: FastifyRequest) => [],
+    getUserAccess: (_: FastifyRequest) => null,
     monitor: false,
     monitorAccess: [],
     prefix: '/',
-    schemasFolder: './schemas'
+    schemasFolder: './schemas',
+
+    documentationAccess: [],
+    url: 'https://example.com',
+    urlDescription: '',
+    title: '',
+    description: '',
+
+    authType: null,
+    apiKeyLocation: null,
+    apiKeyName: null,
+    bearerFormat: 'JWT',
+    openIdConnectUrl: null,
+    oauth2AuthorizationUrl: null,
+    oauth2Flow: null,
+    oauth2RefreshUrl: null,
+    oauth2TokenUrl: null,
+    oauth2Scopes: {}
   }
   monitor: Monitor
   schemas: Schemas
@@ -84,9 +100,7 @@ export class Swarm {
     )
 
     // Decorate fastify instance to handle ACL
-    this.fastifyInstance.decorateRequest('userAccess', function () {
-      return []
-    })
+    this.fastifyInstance.decorateRequest('userAccess', null)
     this.fastifyInstance.addHook(
       'preHandler',
       createUserAccessMiddleware(this.options.getUserAccess)

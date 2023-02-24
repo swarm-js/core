@@ -17,6 +17,24 @@ export class Schemas {
   }
 
   getSwaggerComponents () {
+    /**
+     * $ref : when using shared schema in fastify, user can use the following syntax:
+     *
+     * {
+     *   $ref: 'MySchema#/properties/foo'
+     * }
+     *
+     * For Swagger, we need to transform them into :
+     *
+     * {
+     *   $ref: '#/components/schemas/MySchema/properties/foo
+     * }
+     *
+     * And we'll embed every single shared schema in components.
+     *
+     * (NB: for schema names, replace / by _)
+     */
+
     return Object.fromEntries(
       Object.entries(this.schemas).map((s: any) => [
         s[0].replace(/\//g, '_'),

@@ -25,20 +25,118 @@ export default class Swagger {
       const ret: any = {
         openapi: '3.0.0',
         info: {
-          title: '', // TODO : add title
-          description: '', // TODO : add description
+          title: swarm.options.title,
+          description: swarm.options.description,
           version: request.params.version
         },
         servers: [
           {
-            url: 'https://path', // TODO : Add server,
-            description: '' // TODO : Add description
+            url: swarm.options.url,
+            description: swarm.options.urlDescription
           }
         ],
         components: {
           schemas: swarm.schemas.getSwaggerComponents()
         },
         paths: {}
+      }
+
+      switch (swarm.options.authType) {
+        case 'basic':
+          ret.components.securitySchemes = {
+            auth: {
+              type: 'http',
+              scheme: 'basic'
+            }
+          }
+          break
+        case 'bearer':
+          ret.components.securitySchemes = {
+            auth: {
+              type: 'http',
+              scheme: 'bearer',
+              bearerFormat: swarm.options.bearerFormat
+            }
+          }
+          break
+        case 'apiKey':
+          ret.components.securitySchemes = {
+            auth: {
+              type: 'apiKey',
+              in: swarm.options.apiKeyLocation,
+              name: swarm.options.apiKeyName
+            }
+          }
+          break
+        case 'openId':
+          ret.components.securitySchemes = {
+            auth: {
+              type: 'openIdConnect',
+              openIdConnectUrl: swarm.options.openIdConnectUrl
+            }
+          }
+          break
+        case 'oauth2':
+          switch (swarm.options.oauth2Flow) {
+            case 'authorizationCode':
+              ret.components.securitySchemes = {
+                auth: {
+                  type: 'oauth2',
+                  flows: {
+                    authorizationCode: {
+                      authorizationUrl: swarm.options.oauth2AuthorizationUrl,
+                      tokenUrl: swarm.options.oauth2TokenUrl,
+                      refreshUrl: swarm.options.oauth2RefreshUrl,
+                      scopes: swarm.options.oauth2Scopes
+                    }
+                  }
+                }
+              }
+              break
+            case 'implicit':
+              ret.components.securitySchemes = {
+                auth: {
+                  type: 'oauth2',
+                  flows: {
+                    implicit: {
+                      authorizationUrl: swarm.options.oauth2AuthorizationUrl,
+                      refreshUrl: swarm.options.oauth2RefreshUrl,
+                      scopes: swarm.options.oauth2Scopes
+                    }
+                  }
+                }
+              }
+              break
+            case 'password':
+              ret.components.securitySchemes = {
+                auth: {
+                  type: 'oauth2',
+                  flows: {
+                    password: {
+                      tokenUrl: swarm.options.oauth2TokenUrl,
+                      refreshUrl: swarm.options.oauth2RefreshUrl,
+                      scopes: swarm.options.oauth2Scopes
+                    }
+                  }
+                }
+              }
+              break
+            case 'clientCredentials':
+              ret.components.securitySchemes = {
+                auth: {
+                  type: 'oauth2',
+                  flows: {
+                    clientCredentials: {
+                      tokenUrl: swarm.options.oauth2TokenUrl,
+                      refreshUrl: swarm.options.oauth2RefreshUrl,
+                      scopes: swarm.options.oauth2Scopes
+                    }
+                  }
+                }
+              }
+              break
+          }
+          break
       }
 
       for (let controller of swarm.controllers.list) {
@@ -58,6 +156,14 @@ export default class Swagger {
             summary: method.title,
             description: method.description,
             operationId: `${controller.name}@${method.name}`,
+            security:
+              method.access !== null
+                ? [
+                    {
+                      auth: method.access
+                    }
+                  ]
+                : undefined,
             parameters: [
               ...method.parameters.map((param: SwarmParameter) => ({
                 name: param.name,
@@ -138,23 +244,6 @@ export default class Swagger {
 
       cache[request.params.version] = ret
     }
-    /**
-     * $ref : when using shared schema in fastify, user can use the following syntax:
-     *
-     * {
-     *   $ref: 'MySchema#/properties/foo'
-     * }
-     *
-     * For Swagger, we need to transform them into :
-     *
-     * {
-     *   $ref: '#/components/schemas/MySchema/properties/foo
-     * }
-     *
-     * And we'll embed every single shared schema in components.
-     *
-     * (NB: for schema names, replace / by _)
-     */
 
     return cache[request.params.version]
   }
