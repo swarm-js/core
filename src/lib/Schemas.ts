@@ -17,30 +17,41 @@ export class Schemas {
   }
 
   getSwaggerComponents () {
-    /**
-     * $ref : when using shared schema in fastify, user can use the following syntax:
-     *
-     * {
-     *   $ref: 'MySchema#/properties/foo'
-     * }
-     *
-     * For Swagger, we need to transform them into :
-     *
-     * {
-     *   $ref: '#/components/schemas/MySchema/properties/foo
-     * }
-     *
-     * And we'll embed every single shared schema in components.
-     *
-     * (NB: for schema names, replace / by _)
-     */
-
     return Object.fromEntries(
       Object.entries(this.schemas).map((s: any) => [
         s[0].replace(/\//g, '_'),
         s[1]
       ])
     )
+  }
+
+  /**
+   * $ref : when using shared schema in fastify, user can use the following syntax:
+   *
+   * {
+   *   $ref: 'MySchema#/properties/foo'
+   * }
+   *
+   * For Swagger, we need to transform them into :
+   *
+   * {
+   *   $ref: '#/components/schemas/MySchema/properties/foo
+   * }
+   *
+   * And we'll embed every single shared schema in components.
+   *
+   * (NB: for schema names, replace / by _)
+   */
+  private refToSwagger (o: any): any {
+    for (let key in o) {
+      if (typeof o[key] === 'object' && o[key] !== null) {
+        o[key] = this.refToSwagger(o[key])
+      } else if (key === '$ref') {
+        const ref = o[key].split('#')
+        o[key] = `#/components/schemas/${ref[0].replace(/\//g, '_')}${ref[1]}`
+      }
+    }
+    return o
   }
 
   get (name: string) {
@@ -50,7 +61,7 @@ export class Schemas {
   async load (path: string, name: string) {
     try {
       const content: string = await fs.readFile(path, { encoding: 'utf8' })
-      this.schemas[name] = JSON.parse(content)
+      this.schemas[name] = this.refToSwagger(JSON.parse(content))
       this.swarm.log('info', `Found schema ${name}`)
       const fastifySchema = JSON.parse(content)
       fastifySchema.$id = name

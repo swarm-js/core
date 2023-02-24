@@ -1,6 +1,6 @@
 {
   "name": "@swarmjs/core",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Another useless NodeJS framework.",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
