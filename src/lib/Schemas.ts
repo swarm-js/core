@@ -7,6 +7,7 @@ import {
   SwarmQuery,
   SwarmReturn
 } from './interfaces'
+import { getErrorMessage } from './tools/error'
 
 export class Schemas {
   private swarm: Swarm
@@ -66,7 +67,12 @@ export class Schemas {
       const fastifySchema = JSON.parse(content)
       fastifySchema.$id = name
       this.swarm.fastify.addSchema(fastifySchema)
-    } catch {}
+    } catch (err: any) {
+      this.swarm.log(
+        'error',
+        `Cannot load schema ${path}: ${getErrorMessage(err)}`
+      )
+    }
   }
 
   async loadDir (dir: string, prefix: string = ''): Promise<void> {
@@ -76,7 +82,7 @@ export class Schemas {
         const filepath: string = path.join(dir, file)
         const stat = await fs.lstat(filepath)
         if (stat.isFile() && file.substring(file.length - 5) === '.json')
-          await this.loadDir(
+          await this.load(
             filepath,
             `${prefix.length ? prefix + '/' : ''}${file.substring(
               0,
@@ -90,7 +96,9 @@ export class Schemas {
           )
         }
       }
-    } catch {}
+    } catch (err: any) {
+      this.swarm.log('error', `Cannot load dir ${dir}: ${getErrorMessage(err)}`)
+    }
   }
 
   generate (method: SwarmMethod): any {

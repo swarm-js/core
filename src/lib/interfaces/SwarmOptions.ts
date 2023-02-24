@@ -7,7 +7,7 @@ export interface SwarmOptions {
   schemasFolder: string
 
   // Related to Swagger documentation
-  documentationAccess: string | string[]
+  documentationAccess: string | string[] | null
   url: string
   urlDescription: string
   title: string

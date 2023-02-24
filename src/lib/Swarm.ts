@@ -27,7 +27,7 @@ export class Swarm {
     prefix: '/',
     schemasFolder: './schemas',
 
-    documentationAccess: [],
+    documentationAccess: null,
     url: 'https://example.com',
     urlDescription: '',
     title: '',
@@ -53,7 +53,9 @@ export class Swarm {
       ...this.options,
       ...conf
     }
-    this.fastifyInstance = fastify({})
+    this.fastifyInstance = fastify({
+      logger: true
+    })
     this.monitor = new Monitor(this)
     this.schemas = new Schemas(this)
     this.controllers = new Controllers(this)

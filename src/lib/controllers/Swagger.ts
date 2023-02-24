@@ -1,4 +1,4 @@
-import { method, prefix, route } from '../decorators'
+import { method, parameter, prefix, returns, route } from '../decorators'
 import { SwarmParameter, SwarmQuery, SwarmReturn } from '../interfaces'
 import { Swarm } from '../Swarm'
 import { checkAccess } from '../tools/acl'
@@ -18,6 +18,12 @@ export default class Swagger {
 
   @method('GET')
   @route('/:version/swagger.json')
+  @parameter('version', { type: 'string' }, 'The API version, defaults to : v1')
+  @returns(
+    200,
+    { type: 'object', additionalProperties: true },
+    'Swagger JSON file'
+  )
   static async getSwaggerFile (request: any) {
     checkAccess(request, swarm.options.documentationAccess)
 

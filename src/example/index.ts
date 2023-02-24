@@ -34,6 +34,6 @@ const app = new Swarm({
   monitor: true
 })
 
-app.addController(UsersController)
+app.controllers.add(UsersController)
 
 app.listen(8080)

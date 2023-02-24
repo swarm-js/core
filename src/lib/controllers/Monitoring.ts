@@ -4,6 +4,7 @@ import {
   method,
   parameter,
   prefix,
+  returns,
   route,
   title
 } from '../decorators'
@@ -29,6 +30,50 @@ export default class Monitoring {
     'filter',
     { type: 'string' },
     'Method name as in controller@method. Use "all" to retrieve global statistics.'
+  )
+  @returns(
+    200,
+    {
+      type: 'object',
+      properties: {
+        uptime: {
+          type: 'number',
+          description: 'Number of milliseconds since last reboot'
+        },
+        global: {
+          type: 'object',
+          properties: {
+            calls: { type: 'number' },
+            duration: {
+              type: 'object',
+              properties: {
+                avg: { type: 'number' },
+                min: { type: 'number' },
+                max: { type: 'number' }
+              }
+            }
+          }
+        },
+        perDay: {
+          type: 'object',
+          additionalProperties: {
+            type: 'object',
+            properties: {
+              calls: { type: 'number' },
+              duration: {
+                type: 'object',
+                properties: {
+                  avg: { type: 'number' },
+                  min: { type: 'number' },
+                  max: { type: 'number' }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    'Statistics'
   )
   static async getStats (request: any) {
     checkAccess(request, swarm.options.monitorAccess)
