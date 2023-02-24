@@ -7,7 +7,10 @@ import {
   Swarm,
   title,
   method,
-  route
+  route,
+  access,
+  query,
+  version
 } from '../'
 
 @title('Users')
@@ -19,8 +22,11 @@ class UsersController {
   @method('POST')
   @route('/login')
   @accepts('Login')
+  @access('user')
+  @query('source', { type: 'string' }, 'Auth source')
   @returns(200, 'JWT', 'A JWT token used to authenticate user requests')
   @returns(403, 'Error', 'Credentials are invalid')
+  @version(['v1', 'v2'])
   static async login (request: FastifyRequest, reply: FastifyReply) {
     console.log(request, reply)
     return {
@@ -31,7 +37,11 @@ class UsersController {
 
 const app = new Swarm({
   logLevel: 'info',
-  monitor: true
+  monitor: true,
+  authType: 'openId',
+  openIdConnectUrl: 'http://sss.www.com',
+  title: 'My API',
+  description: 'A super API made with SwarmJS'
 })
 
 app.controllers.add(UsersController)

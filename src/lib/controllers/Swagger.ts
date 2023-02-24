@@ -147,6 +147,11 @@ export default class Swagger {
 
       for (let controller of swarm.controllers.list) {
         for (let method of controller.methods) {
+          if (
+            method.version.includes(request.params.version) === false &&
+            !controller.root
+          )
+            continue
           const path = `${controller.root ? '' : '/' + request.params.version}${
             method.fullRoute
           }`
