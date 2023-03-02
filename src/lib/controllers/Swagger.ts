@@ -35,12 +35,7 @@ export default class Swagger {
           description: swarm.options.description,
           version: request.params.version
         },
-        servers: [
-          {
-            url: swarm.options.url,
-            description: swarm.options.urlDescription
-          }
-        ],
+        servers: swarm.options.servers ?? [],
         components: {
           schemas: swarm.schemas.getSwaggerComponents()
         },

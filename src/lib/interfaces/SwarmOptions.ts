@@ -1,3 +1,6 @@
+import { SwarmScopes } from './SwarmScopes'
+import { SwarmServer } from './SwarmServer'
+
 export interface SwarmOptions {
   logLevel: string
   getUserAccess: any
@@ -8,8 +11,7 @@ export interface SwarmOptions {
 
   // Related to Swagger documentation
   documentationAccess: string | string[] | null
-  url: string
-  urlDescription: string
+  servers: SwarmServer[]
   title: string
   description: string
 
@@ -28,5 +30,5 @@ export interface SwarmOptions {
     | 'clientCredentials'
   oauth2TokenUrl: null | string
   oauth2RefreshUrl: null | string
-  oauth2Scopes: any
+  oauth2Scopes: SwarmScopes
 }

@@ -1,5 +1,5 @@
 import fastify, { FastifyInstance, FastifyRequest } from 'fastify'
-import { SwarmOptions } from './interfaces'
+import { SwarmOptions, SwarmScopes } from './interfaces'
 import Monitoring from './controllers/Monitoring'
 import { createUserAccessMiddleware } from './middlewares/populateUserAccess'
 import { getErrorMessage } from './tools/error'
@@ -28,8 +28,7 @@ export class Swarm {
     schemasFolder: './schemas',
 
     documentationAccess: null,
-    url: 'https://example.com',
-    urlDescription: '',
+    servers: [],
     title: '',
     description: '',
 
@@ -91,6 +90,80 @@ export class Swarm {
       return
 
     console.log(`[Swarm][${level}]`, content)
+  }
+
+  addServer (url: string, description: string = '') {
+    this.options.servers.push({ url, description })
+  }
+
+  basicAuth () {
+    this.options.authType = 'basic'
+  }
+
+  bearerAuth (bearerFormat: string = 'JWT') {
+    this.options.authType = 'bearer'
+    this.options.bearerFormat = bearerFormat
+  }
+
+  apiKeyAuth (location: 'header' | 'query' | 'cookie', name: string) {
+    this.options.authType = 'apiKey'
+    this.options.apiKeyLocation = location
+    this.options.apiKeyName = name
+  }
+
+  openIdAuth (connectUrl: string) {
+    this.options.authType = 'openId'
+    this.options.openIdConnectUrl = connectUrl
+  }
+
+  oauth2AuthAutorizationCode (
+    authorizationUrl: string,
+    tokenUrl: string,
+    refreshUrl: string,
+    scopes: SwarmScopes
+  ) {
+    this.options.authType = 'oauth2'
+    this.options.oauth2Flow = 'authorizationCode'
+    this.options.oauth2AuthorizationUrl = authorizationUrl
+    this.options.oauth2TokenUrl = tokenUrl
+    this.options.oauth2RefreshUrl = refreshUrl
+    this.options.oauth2Scopes = scopes
+  }
+
+  oauth2AuthImplicit (
+    authorizationUrl: string,
+    refreshUrl: string,
+    scopes: SwarmScopes
+  ) {
+    this.options.authType = 'oauth2'
+    this.options.oauth2Flow = 'implicit'
+    this.options.oauth2AuthorizationUrl = authorizationUrl
+    this.options.oauth2RefreshUrl = refreshUrl
+    this.options.oauth2Scopes = scopes
+  }
+
+  oauth2AuthPassword (
+    tokenUrl: string,
+    refreshUrl: string,
+    scopes: SwarmScopes
+  ) {
+    this.options.authType = 'oauth2'
+    this.options.oauth2Flow = 'password'
+    this.options.oauth2TokenUrl = tokenUrl
+    this.options.oauth2RefreshUrl = refreshUrl
+    this.options.oauth2Scopes = scopes
+  }
+
+  oauth2AuthClientCredentials (
+    tokenUrl: string,
+    refreshUrl: string,
+    scopes: SwarmScopes
+  ) {
+    this.options.authType = 'oauth2'
+    this.options.oauth2Flow = 'clientCredentials'
+    this.options.oauth2TokenUrl = tokenUrl
+    this.options.oauth2RefreshUrl = refreshUrl
+    this.options.oauth2Scopes = scopes
   }
 
   async listen (port: number = 3000, host: string = '0.0.0.0') {
