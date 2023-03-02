@@ -163,14 +163,31 @@ export default class Swagger {
             description: method.description,
             operationId: `${controller.name}@${method.name}`,
             security:
-              method.access !== null
+              controller.access !== null || method.access !== null
                 ? [
                     {
-                      auth: method.access
+                      auth:
+                        method.access !== null
+                          ? method.access
+                          : controller.access
                     }
                   ]
                 : undefined,
             parameters: [
+              ...controller.parameters.map((param: SwarmParameter) => ({
+                name: param.name,
+                in: 'path',
+                schema: !param.schema
+                  ? undefined
+                  : typeof param.schema === 'string'
+                  ? {
+                      $ref: `#/components/schemas/${Swagger.schemaNameToSwagger(
+                        param.schema
+                      )}`
+                    }
+                  : param.schema,
+                required: true
+              })),
               ...method.parameters.map((param: SwarmParameter) => ({
                 name: param.name,
                 in: 'path',
