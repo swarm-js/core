@@ -26,6 +26,7 @@ export class Swarm {
     monitorAccess: [],
     prefix: '/',
     schemasFolder: './schemas',
+    defaultVersion: 'v1',
 
     documentationAccess: null,
     servers: [],

@@ -1,3 +1,9 @@
+/**
+ * Decorator to configure HTTP route to use. Can only be used on methods.
+ *
+ * @param route   HTTP Route.
+ * @returns       The decorator function.
+ */
 export function route (route: string): any {
   return (target: any, propertyKey: string): void => {
     if (!propertyKey) return

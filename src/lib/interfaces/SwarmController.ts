@@ -1,4 +1,5 @@
 import { SwarmMethod } from './SwarmMethod'
+import { SwarmParameter } from './SwarmParameter'
 
 export interface SwarmController {
   name: string
@@ -9,4 +10,6 @@ export interface SwarmController {
   prefix: string
   root: boolean
   version: string[]
+  access: string | string[] | null
+  parameters: SwarmParameter[]
 }

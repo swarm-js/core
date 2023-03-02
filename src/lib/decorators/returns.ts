@@ -1,8 +1,18 @@
 import { SwarmReturn } from '../interfaces'
+import { JSONSchema7 } from '../interfaces/JsonSchema'
 
+/**
+ * Decorator to filter returned data. Can only be used on methods.
+ *
+ * @param code          HTTP code. Can be "2xx" for all 2xx codes, for exemple.
+ * @param schema        JSON Schema or local schema name.
+ * @param description   Description.
+ * @param mimeType      Returned mime-type.
+ * @returns             The decorator function.
+ */
 export function returns (
   code: number | string,
-  schema: any,
+  schema: JSONSchema7 | string | null,
   description: string = '',
   mimeType: string = 'application/json'
 ): any {

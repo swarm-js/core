@@ -2,6 +2,7 @@ import { Swarm } from './Swarm'
 import fs from 'fs/promises'
 import path from 'path'
 import {
+  SwarmController,
   SwarmMethod,
   SwarmParameter,
   SwarmQuery,
@@ -101,7 +102,7 @@ export class Schemas {
     }
   }
 
-  generate (method: SwarmMethod): any {
+  generate (controller: SwarmController, method: SwarmMethod): any {
     const schema: any = {}
 
     if (method.accepts !== null) {
@@ -119,20 +120,23 @@ export class Schemas {
           break
         default:
           schema.body = {
-            anyOf: accepts
+            allOf: accepts
           }
           break
       }
     }
 
-    const params = method.parameters
+    const params = [
+      ...(controller.parameters ?? []),
+      ...(method.parameters ?? [])
+    ]
       .map((param: SwarmParameter) => [
         param.name,
         typeof param.schema === 'string'
           ? { $ref: `${param.schema}#` }
           : param.schema
       ])
-      .filter(a => a[1] !== undefined)
+      .filter(a => [null, undefined].includes(a[1]) !== true)
     if (params.length)
       schema.params = {
         type: 'object',
@@ -146,7 +150,7 @@ export class Schemas {
           ? { $ref: `${query.schema}#` }
           : query.schema
       ])
-      .filter(a => a[1] !== undefined)
+      .filter(a => [null, undefined].includes(a[1]) !== true)
     if (queries.length)
       schema.querystring = {
         type: 'object',
@@ -158,7 +162,7 @@ export class Schemas {
         ret.code,
         typeof ret.schema === 'string' ? { $ref: `${ret.schema}#` } : ret.schema
       ])
-      .filter(a => a[1] !== undefined)
+      .filter(a => [null, undefined].includes(a[1]) !== true)
     if (returns.length) schema.response = Object.fromEntries(returns)
 
     return schema

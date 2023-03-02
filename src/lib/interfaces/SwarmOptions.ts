@@ -8,6 +8,7 @@ export interface SwarmOptions {
   monitorAccess: string | string[]
   prefix: string
   schemasFolder: string
+  defaultVersion: string
 
   // Related to Swagger documentation
   documentationAccess: string | string[] | null

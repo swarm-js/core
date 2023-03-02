@@ -1,3 +1,10 @@
+/**
+ * Decorator to set version for this controller or method.
+ * If used on method, overwrites version configured in controller (defaults to "v1", can be changed in options).
+ *
+ * @param version   Version. Defaults to "v1", or the value defined in options.
+ * @returns         The decorator function.
+ */
 export function version(version: string | string[]): any {
   return (target: any, propertyKey: string): void => {
     if (target.prototype.swarm === undefined) target.prototype.swarm = {}

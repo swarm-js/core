@@ -25,7 +25,9 @@ export class Controllers {
       description: null,
       prefix: '/',
       root: false,
-      version: ['v1']
+      version: [this.swarm.options.defaultVersion],
+      access: null,
+      parameters: []
     }
 
     this.swarm.log('debug', `Reading ${ret.name} controller`)
@@ -60,6 +62,24 @@ export class Controllers {
         `${ret.name}: found root : ${ret.root ? 'Yes' : 'no'}`
       )
     }
+    if (controller.prototype.swarm?.access !== undefined) {
+      ret.access = controller.prototype.swarm.access
+      this.swarm.log(
+        'debug',
+        `${ret.name}: found access: ${JSON.stringify(ret.access, null, 4)}`
+      )
+    }
+    if (controller.prototype.swarm?.parameters !== undefined) {
+      ret.parameters = controller.prototype.swarm.parameters
+      this.swarm.log(
+        'debug',
+        `${ret.name}: found parameters: ${JSON.stringify(
+          ret.parameters,
+          null,
+          4
+        )}`
+      )
+    }
 
     this.swarm.log('debug', `${ret.name}: reading methods`)
     for (let name of Object.getOwnPropertyNames(controller)) {
@@ -75,6 +95,8 @@ export class Controllers {
       )
 
       if (method !== null) {
+        if (method.version.length === 0) method.version = controller.version
+
         ret.methods.push(method)
         this.swarm.log(
           'debug',
@@ -114,7 +136,7 @@ export class Controllers {
       returns: [],
       parameters: [],
       query: [],
-      version: ['v1']
+      version: []
     }
 
     // Apply method options
@@ -196,7 +218,11 @@ export class Controllers {
     method: SwarmMethod
   ) {
     return async (request: FastifyRequest, reply: FastifyReply) => {
-      if (method.access !== null) checkAccess(request, method.access)
+      if (controller.access !== null || method.access !== null)
+        checkAccess(
+          request,
+          method.access !== null ? method.access : controller.access
+        )
 
       const startDate = +new Date()
       const response = await method.instance(request, reply)
@@ -214,7 +240,7 @@ export class Controllers {
 
       for (const method of controller.methods) {
         for (let version of method.version) {
-          const schema: any = this.swarm.schemas.generate(method)
+          const schema: any = this.swarm.schemas.generate(controller, method)
 
           this.swarm.fastify.route({
             method: <HTTPMethods>method.method,

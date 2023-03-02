@@ -1,8 +1,17 @@
-import { SwarmParameter } from '../interfaces'
+import { SwarmQuery } from '../interfaces'
+import { JSONSchema7 } from '../interfaces/JsonSchema'
 
+/**
+ * Decorator to configure a URL query parameter. Can only be used on methods.
+ *
+ * @param name          Query parameter name.
+ * @param schema        JSON Schema or local schema name.
+ * @param description   Description.
+ * @returns             The decorator function.
+ */
 export function query (
   name: string,
-  schema: any,
+  schema: JSONSchema7 | string | null,
   description: string = ''
 ): any {
   return (target: any, propertyKey: string): void => {
@@ -18,7 +27,7 @@ export function query (
       target.prototype.swarm.methods[propertyKey].query = []
     target.prototype.swarm.methods[propertyKey].query =
       target.prototype.swarm.methods[propertyKey].query.filter(
-        (r: SwarmParameter) => r.name !== name
+        (r: SwarmQuery) => r.name !== name
       )
     target.prototype.swarm.methods[propertyKey].query.push({
       name,

@@ -1,5 +1,14 @@
+import { JSONSchema7 } from '../interfaces/JsonSchema'
+
+/**
+ * Decorator to filter data input. Can be only used on methods.
+ *
+ * @param schema    JSON Schemas or local schema name. If multiple supplied, they will be merged with allOf.
+ * @param mimeType  Accepted mime-type.
+ * @returns         The decorator function.
+ */
 export function accepts (
-  schema: any,
+  schema: string | string[] | JSONSchema7 | JSONSchema7[],
   mimeType: string = 'application/json'
 ): any {
   return (target: any, propertyKey: string): void => {

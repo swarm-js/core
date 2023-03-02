@@ -1,3 +1,9 @@
+/**
+ * Decorator to add description to Swagger documentation. Can be used on methods, or controllers.
+ *
+ * @param description   Description.
+ * @returns             The decorator function.
+ */
 export function description (description: string): any {
   return (target: any, propertyKey: string): void => {
     if (target.prototype.swarm === undefined) target.prototype.swarm = {}
