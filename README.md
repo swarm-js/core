@@ -102,10 +102,4 @@ Distributed under the MIT License. See [LICENSE](https://github.com/swarm-js/cor
 
 ## Authors
 
-- **Shaan Khan** - _Comp Sci Student_ - [Shaan Khan](https://github.com/ShaanCoding/) - _Built ReadME Template_
-
-## Acknowledgements
-
-- [ShaanCoding](https://github.com/ShaanCoding/)
-- [Othneil Drew](https://github.com/othneildrew/Best-README-Template)
-- [ImgShields](https://shields.io/)
+- [Guillaume Gagnaire](https://github.com/guillaume-gagnaire)\*\* - _CTO @ Smart Moov_
