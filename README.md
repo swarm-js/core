@@ -1,12 +1,9 @@
-<br/>
-<p align="center">
 ![Version](https://img.shields.io/npm/v/@swarmjs/core) ![Downloads](https://img.shields.io/npm/dm/@swarmjs/core) ![License](https://img.shields.io/github/license/swarm-js/core)
+<br/>
 
-  <br/>
-  <br/>
-
+<p align="center">
   <a href="https://github.com/swarm-js/core">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="images/logo.png" alt="Logo" width="120" height="120">
   </a>
 
   <h3 align="center">@swarmjs/core</h3>
