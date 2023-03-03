@@ -48,7 +48,8 @@ export default class Swagger {
         components: {
           schemas: swarm.schemas.getSwaggerComponents()
         },
-        paths: {}
+        paths: {},
+        tags: []
       }
 
       switch (swarm.options.authType) {
@@ -150,6 +151,11 @@ export default class Swagger {
       }
 
       for (let controller of swarm.controllers.list) {
+        ret.tags.push({
+          name: controller.title ?? controller.name,
+          description: controller.description
+        })
+
         for (let method of controller.methods) {
           if (
             method.version.includes(request.params.version) === false &&
@@ -167,7 +173,7 @@ export default class Swagger {
           if (ret.paths[path] === undefined) ret.paths[path] = {}
 
           ret.paths[path][verb] = {
-            tags: [controller.name],
+            tags: [controller.title ?? controller.name],
             summary: method.title,
             description: method.description,
             operationId: `${controller.name}@${method.name}`,
