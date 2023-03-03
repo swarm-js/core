@@ -13,7 +13,7 @@
   </p>
 </p>
 
-![Downloads](https://img.shields.io/github/downloads/swarm-js/core/total) ![Issues](https://img.shields.io/github/issues/swarm-js/core) ![License](https://img.shields.io/github/license/swarm-js/core)
+![Version](https://img.shields.io/npm/v/@swarmjs/core) ![Downloads](https://img.shields.io/npm/dm/@swarmjs/core) ![License](https://img.shields.io/github/license/swarm-js/core)
 
 ## Table Of Contents
 
