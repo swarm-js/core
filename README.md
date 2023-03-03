@@ -1,4 +1,4 @@
-![Version](https://img.shields.io/npm/v/@swarmjs/core) ![Downloads](https://img.shields.io/npm/dm/@swarmjs/core) ![License](https://img.shields.io/github/license/swarm-js/core)
+![Version](https://img.shields.io/npm/v/@swarmjs/core) ![Downloads](https://img.shields.io/npm/dm/@swarmjs/core) ![License](https://img.shields.io/github/license/swarm-js/core) ![Build](https://img.shields.io/github/actions/workflow/status/swarm-js/core/build.yml?branch=main)
 <br/>
 
 <p align="center">
