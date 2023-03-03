@@ -1,10 +1,10 @@
 /**
- * Decorator to configure HTTP route to use. Can only be used on methods.
+ * Decorator to the route for a GET request. Can only be used on methods.
  *
- * @param route   HTTP Route.
+ * @param path    URL path.
  * @returns       The decorator function.
  */
-export function route (route: string): any {
+export function Get (path: string = '/'): any {
   return (target: any, propertyKey: string): void => {
     if (!propertyKey) return
 
@@ -14,6 +14,7 @@ export function route (route: string): any {
     if (target.prototype.swarm.methods[propertyKey] === undefined)
       target.prototype.swarm.methods[propertyKey] = {}
 
-    target.prototype.swarm.methods[propertyKey].route = route
+    target.prototype.swarm.methods[propertyKey].method = 'GET'
+    target.prototype.swarm.methods[propertyKey].route = path
   }
 }

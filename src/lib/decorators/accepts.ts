@@ -7,7 +7,7 @@ import { JSONSchema7 } from '../interfaces/JsonSchema'
  * @param mimeType  Accepted mime-type.
  * @returns         The decorator function.
  */
-export function accepts (
+export function Accepts (
   schema: string | string[] | JSONSchema7 | JSONSchema7[],
   mimeType: string = 'application/json'
 ): any {

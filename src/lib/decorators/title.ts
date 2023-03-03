@@ -4,7 +4,7 @@
  * @param title   Title.
  * @returns       The decorator function.
  */
-export function title (title: string): any {
+export function Title (title: string): any {
   return (target: any, propertyKey: string): void => {
     if (target.prototype.swarm === undefined) target.prototype.swarm = {}
 

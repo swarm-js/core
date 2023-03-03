@@ -1,12 +1,11 @@
 import dayjs from 'dayjs'
 import {
-  description,
-  method,
-  parameter,
-  prefix,
-  returns,
-  route,
-  title
+  Description,
+  Get,
+  Parameter,
+  Prefix,
+  Returns,
+  Title
 } from '../decorators'
 import { Swarm } from '../Swarm'
 import { checkAccess } from '../tools/acl'
@@ -14,24 +13,23 @@ import { checkAccess } from '../tools/acl'
 let swarm: Swarm
 let startDate: number | null = null
 
-@title('Monitoring')
-@description('Handles Swarm instance monitoring stats')
-@prefix('/__monitoring__')
+@Title('Monitoring')
+@Description('Handles Swarm instance monitoring stats')
+@Prefix('/__monitoring__')
 export default class Monitoring {
   static init (swarmInstance: Swarm) {
     swarm = swarmInstance
     startDate = +new Date()
   }
 
-  @method('GET')
-  @route('/stats/:filter')
-  @title('Retrieve statistics from Swarm instance')
-  @parameter(
+  @Get('/stats/:filter')
+  @Title('Retrieve statistics from Swarm instance')
+  @Parameter(
     'filter',
     { type: 'string' },
     'Method name as in controller@method. Use "all" to retrieve global statistics.'
   )
-  @returns(
+  @Returns(
     200,
     {
       type: 'object',

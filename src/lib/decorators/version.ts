@@ -5,7 +5,7 @@
  * @param version   Version. Defaults to "v1", or the value defined in options.
  * @returns         The decorator function.
  */
-export function version(version: string | string[]): any {
+export function Version(version: string | string[]): any {
   return (target: any, propertyKey: string): void => {
     if (target.prototype.swarm === undefined) target.prototype.swarm = {}
 

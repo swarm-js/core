@@ -183,6 +183,10 @@ export class Swarm {
     )
 
     // Add documentation route
+    this.fastifyInstance.register(require('@fastify/static'), {
+      root: require('swagger-ui-dist').getAbsoluteFSPath(),
+      prefix: '/swagger'
+    })
     this.controllers.add(Swagger)
 
     // Add monitor route

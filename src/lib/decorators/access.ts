@@ -4,7 +4,7 @@
  * @param access    Required scope or scopes.
  * @returns         The decorator function.
  */
-export function access (access: string | string[] = []): any {
+export function Access (access: string | string[] = []): any {
   return (target: any, propertyKey: string): void => {
     if (target.prototype.swarm === undefined) target.prototype.swarm = {}
     if (access instanceof Array === false) access = [access as string]

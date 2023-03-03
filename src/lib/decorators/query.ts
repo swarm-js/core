@@ -9,7 +9,7 @@ import { JSONSchema7 } from '../interfaces/JsonSchema'
  * @param description   Description.
  * @returns             The decorator function.
  */
-export function query (
+export function Query (
   name: string,
   schema: JSONSchema7 | string | null,
   description: string = ''

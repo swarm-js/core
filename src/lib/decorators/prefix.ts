@@ -5,7 +5,7 @@
  * @param root    If TRUE, ignores sets this prefix relative to root URL, instead of /{version} (ex: /v1).
  * @returns       The decorator function.
  */
-export function prefix (prefix: string, root: boolean = false): any {
+export function Prefix (prefix: string, root: boolean = false): any {
   return (target: any): void => {
     if (target.prototype.swarm === undefined) target.prototype.swarm = {}
 

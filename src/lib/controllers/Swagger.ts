@@ -1,4 +1,11 @@
-import { method, parameter, prefix, returns, route } from '../decorators'
+import {
+  Description,
+  Get,
+  Parameter,
+  Prefix,
+  Returns,
+  Title
+} from '../decorators'
 import { SwarmParameter, SwarmQuery, SwarmReturn } from '../interfaces'
 import { Swarm } from '../Swarm'
 import { checkAccess } from '../tools/acl'
@@ -6,7 +13,9 @@ import { checkAccess } from '../tools/acl'
 let swarm: Swarm
 let cache: any = {}
 
-@prefix('/', true)
+@Title('Swagger')
+@Description('Handles API documentation display')
+@Prefix('/', true)
 export default class Swagger {
   static init (swarmInstance: Swarm) {
     swarm = swarmInstance
@@ -16,10 +25,10 @@ export default class Swagger {
     return name.replace(/\//g, '_')
   }
 
-  @method('GET')
-  @route('/:version/swagger.json')
-  @parameter('version', { type: 'string' }, 'The API version, defaults to : v1')
-  @returns(
+  @Title('Get Swagger documentation file')
+  @Get('/:version/swagger.json')
+  @Parameter('version', { type: 'string' }, 'The API version, defaults to : v1')
+  @Returns(
     200,
     { type: 'object', additionalProperties: true },
     'Swagger JSON file'
@@ -269,5 +278,63 @@ export default class Swagger {
     }
 
     return cache[request.params.version]
+  }
+
+  @Title('Display Swagger UI for this API version')
+  @Get('/:version')
+  @Parameter('version', { type: 'string' }, 'The API version, defaults to : v1')
+  @Returns(200, { type: 'string' }, 'Swagger UI HTML code', 'text/html')
+  static async getSwaggerUi (request: any, reply: any) {
+    checkAccess(request, swarm.options.documentationAccess)
+
+    reply.type('text/html').send(`<!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <title>Swagger UI</title>
+        <link rel="stylesheet" type="text/css" href="/swagger/swagger-ui.css" />
+        <link rel="stylesheet" type="text/css" href="/swagger/index.css" />
+        <link rel="icon" type="image/png" href="/swagger/favicon-32x32.png" sizes="32x32" />
+        <link rel="icon" type="image/png" href="/swagger/favicon-16x16.png" sizes="16x16" />
+      </head>
+    
+      <body>
+        <div id="swagger-ui"></div>
+        <script src="/swagger/swagger-ui-bundle.js" charset="UTF-8"> </script>
+        <script src="/swagger/swagger-ui-standalone-preset.js" charset="UTF-8"> </script>
+        <script src="/${request.params.version}/swagger-initializer.js" charset="UTF-8"> </script>
+      </body>
+    </html>
+    `)
+  }
+
+  @Title('Get Swagger UI initialization file')
+  @Get('/:version/swagger-initializer.js')
+  @Parameter('version', { type: 'string' }, 'The API version, defaults to : v1')
+  @Returns(
+    200,
+    { type: 'string' },
+    'Swagger UI initialization script',
+    'text/javascript'
+  )
+  static async getInitializerFile (request: any, reply: any) {
+    checkAccess(request, swarm.options.documentationAccess)
+
+    reply.type('text/javascript').send(`window.onload = function() {
+  window.ui = SwaggerUIBundle({
+    url: "/${request.params.version}/swagger.json",
+    dom_id: '#swagger-ui',
+    deepLinking: true,
+    presets: [
+      SwaggerUIBundle.presets.apis,
+      SwaggerUIStandalonePreset
+    ],
+    plugins: [
+      SwaggerUIBundle.plugins.DownloadUrl
+    ],
+    layout: "StandaloneLayout"
+  });
+};
+`)
   }
 }

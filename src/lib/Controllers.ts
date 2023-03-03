@@ -95,9 +95,17 @@ export class Controllers {
       )
 
       if (method !== null) {
-        if (method.version.length === 0) method.version = controller.version
+        if (method.version.length === 0) method.version = ret.version
 
         ret.methods.push(method)
+        this.swarm.log(
+          'debug',
+          `${name} method in ${ret.name} controller is : ${JSON.stringify(
+            method,
+            null,
+            4
+          )}`
+        )
         this.swarm.log(
           'debug',
           `Registering ${name} method in ${ret.name} controller`
@@ -237,6 +245,8 @@ export class Controllers {
 
     for (const controller of this.controllers) {
       this.swarm.log('debug', `Adding routes for ${controller.name}`)
+
+      console.log(JSON.stringify(controller, null, 4))
 
       for (const method of controller.methods) {
         for (let version of method.version) {

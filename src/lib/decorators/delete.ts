@@ -1,12 +1,10 @@
 /**
- * Decorator to configure HTTP verb to use. Can only be used on methods.
+ * Decorator to the route for a DELETE request. Can only be used on methods.
  *
- * @param method  HTTP verb.
+ * @param path    URL path.
  * @returns       The decorator function.
  */
-export function method (
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
-): any {
+export function Delete (path: string = '/'): any {
   return (target: any, propertyKey: string): void => {
     if (!propertyKey) return
 
@@ -16,6 +14,7 @@ export function method (
     if (target.prototype.swarm.methods[propertyKey] === undefined)
       target.prototype.swarm.methods[propertyKey] = {}
 
-    target.prototype.swarm.methods[propertyKey].method = method
+    target.prototype.swarm.methods[propertyKey].method = 'DELETE'
+    target.prototype.swarm.methods[propertyKey].route = path
   }
 }

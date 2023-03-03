@@ -4,7 +4,7 @@
  * @param description   Description.
  * @returns             The decorator function.
  */
-export function description (description: string): any {
+export function Description (description: string): any {
   return (target: any, propertyKey: string): void => {
     if (target.prototype.swarm === undefined) target.prototype.swarm = {}
 

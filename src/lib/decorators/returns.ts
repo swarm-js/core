@@ -10,7 +10,7 @@ import { JSONSchema7 } from '../interfaces/JsonSchema'
  * @param mimeType      Returned mime-type.
  * @returns             The decorator function.
  */
-export function returns (
+export function Returns (
   code: number | string,
   schema: JSONSchema7 | string | null,
   description: string = '',
