@@ -9,6 +9,12 @@
   <p align="center">
     Fast NodeJS API framework with TypeScript : ACL, validation and serialization, Swagger.json generation ...
     <br/>
+    <a href="https://swarmjs.com">
+    Website
+  </a>
+    <a href="https://swarmjs.com/docs">
+    Documentation
+  </a>
     <br/>
   </p>
 </p>
