@@ -1,5 +1,10 @@
 <br/>
 <p align="center">
+![Version](https://img.shields.io/npm/v/@swarmjs/core) ![Downloads](https://img.shields.io/npm/dm/@swarmjs/core) ![License](https://img.shields.io/github/license/swarm-js/core)
+
+  <br/>
+  <br/>
+
   <a href="https://github.com/swarm-js/core">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
@@ -9,17 +14,12 @@
   <p align="center">
     Fast NodeJS API framework with TypeScript : ACL, validation and serialization, Swagger.json generation ...
     <br/>
-    <a href="https://swarmjs.com">
-    Website
-  </a>
-    <a href="https://swarmjs.com/docs">
-    Documentation
-  </a>
+    <br/>
+      <a href="https://swarmjs.com"><strong>Explore the docs »</strong></a>
+    <br/>
     <br/>
   </p>
 </p>
-
-![Version](https://img.shields.io/npm/v/@swarmjs/core) ![Downloads](https://img.shields.io/npm/dm/@swarmjs/core) ![License](https://img.shields.io/github/license/swarm-js/core)
 
 ## Table Of Contents
 
