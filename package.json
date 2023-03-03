@@ -1,6 +1,6 @@
 {
   "name": "@swarmjs/core",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "REST API framework with easy documentation and ACL",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",

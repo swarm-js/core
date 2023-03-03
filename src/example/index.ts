@@ -34,7 +34,7 @@ class UsersController {
 }
 
 const app = new Swarm({
-  logLevel: 'debug',
+  logLevel: 'info',
   monitor: true,
   authType: 'openId',
   openIdConnectUrl: 'http://sss.www.com',
