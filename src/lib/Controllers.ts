@@ -16,10 +16,91 @@ export class Controllers {
     return this.controllers
   }
 
+  addController(name: string, options: Partial<SwarmController> = {}): void {
+    const conf: SwarmController = {
+      name: name,
+      methods: [],
+      title: null,
+      description: null,
+      prefix: '/',
+      root: false,
+      version: [this.swarm.options.defaultVersion],
+      access: null,
+      parameters: [],
+      ...options
+    }
+
+    let added = false
+    this.controllers = this.controllers.map((controller: SwarmController) => {
+      if (controller.name === name) {
+        added = true
+        return conf
+      }
+      return controller
+    })
+
+    if (!added) this.controllers.push(conf)
+
+    this.swarm.log('info', `Adding controller ${conf.name}`)
+  }
+
+  addMethod(
+    controllerName: string,
+    method: any,
+    options: Partial<SwarmMethod> = {}
+  ): void {
+    // Ensure controller is configured
+    const controllerIdx = this.controllers.findIndex(
+      (controller: SwarmController) => controller.name === controllerName
+    )
+    if (controllerIdx === -1) {
+      this.swarm.log('error', `Controller ${controllerName} does not exists`)
+      return
+    }
+
+    const conf: SwarmMethod = {
+      name: method.name,
+      instance: method,
+      fullRoute: '',
+      method: null,
+      route: null,
+      title: '',
+      description: '',
+      access: null,
+      accepts: null,
+      returns: [],
+      parameters: [],
+      query: [],
+      version: [],
+      ...options
+    }
+
+    // If no version is configured, take versions from the controller
+    if (conf.version.length === 0)
+      conf.version = this.controllers[controllerIdx].version
+
+    let added = false
+    this.controllers[controllerIdx].methods = this.controllers[
+      controllerIdx
+    ].methods.map((m: SwarmMethod) => {
+      if (m.name === conf.name) {
+        added = true
+        return conf
+      }
+      return m
+    })
+
+    if (!added) this.controllers[controllerIdx].methods.push(conf)
+
+    this.swarm.log(
+      'info',
+      `Adding ${conf.name} method to controller ${controllerName}`
+    )
+  }
+
   add(controller: any): void {
     const ret: SwarmController = {
       name: controller.prototype.constructor.name,
-      instance: controller,
       methods: [],
       title: null,
       description: null,
@@ -82,6 +163,8 @@ export class Controllers {
     }
 
     this.swarm.log('debug', `${ret.name}: reading methods`)
+    this.addController(ret.name, ret)
+
     for (let name of Object.getOwnPropertyNames(controller)) {
       if (typeof controller[name] !== 'function') continue
 
@@ -95,9 +178,8 @@ export class Controllers {
       )
 
       if (method !== null) {
-        if (method.version.length === 0) method.version = ret.version
+        this.addMethod(ret.name, controller[name], method)
 
-        ret.methods.push(method)
         this.swarm.log(
           'debug',
           `${name} method in ${ret.name} controller is : ${JSON.stringify(
@@ -112,17 +194,6 @@ export class Controllers {
         )
       }
     }
-
-    // If no method, no need to add controller
-    if (ret.methods.length === 0) return
-
-    this.controllers.push(ret)
-    this.swarm.log(
-      'info',
-      `Handling ${ret.name} controller with following methods: ${ret.methods
-        .map(m => m.name)
-        .join(', ')}`
-    )
   }
 
   private parseMethod(

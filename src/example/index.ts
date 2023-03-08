@@ -7,10 +7,10 @@ import {
   Prefix,
   Query,
   Returns,
-  Swarm,
   Title,
   Version
-} from '../'
+} from '@swarmjs/decorators'
+import { Swarm } from '../'
 
 @Title('Users')
 @Description('Handles users related actions')

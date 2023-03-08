@@ -48,7 +48,8 @@
     "fastify": "^4.13.0",
     "http-errors": "^2.0.0",
     "require-main-filename": "^2.0.0",
-    "swagger-ui-dist": "^4.17.0"
+    "swagger-ui-dist": "^4.17.0",
+    "@swarmjs/decorators": "^0.1.0"
   },
   "devDependencies": {
     "@ava/typescript": "^1.1.1",

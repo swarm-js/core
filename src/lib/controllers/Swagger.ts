@@ -5,7 +5,7 @@ import {
   Prefix,
   Returns,
   Title
-} from '../decorators'
+} from '@swarmjs/decorators'
 import { SwarmParameter, SwarmQuery, SwarmReturn } from '../interfaces'
 import { Swarm } from '../Swarm'
 import { checkAccess } from '../tools/acl'

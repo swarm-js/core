@@ -3,7 +3,6 @@ import { SwarmParameter } from './SwarmParameter'
 
 export interface SwarmController {
   name: string
-  instance: any
   methods: SwarmMethod[]
   title: string | null
   description: string | null

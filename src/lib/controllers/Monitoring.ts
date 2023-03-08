@@ -6,7 +6,7 @@ import {
   Prefix,
   Returns,
   Title
-} from '../decorators'
+} from '@swarmjs/decorators'
 import { Swarm } from '../Swarm'
 import { checkAccess } from '../tools/acl'
 
