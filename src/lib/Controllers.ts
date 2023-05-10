@@ -79,6 +79,22 @@ export class Controllers {
     if (conf.version.length === 0)
       conf.version = this.controllers[controllerIdx].version
 
+    if (conf.method === null || conf.route === null) {
+      this.swarm.log(
+        'debug',
+        `Method ${method.name} is missing method or route, cannot be handled`
+      )
+      return
+    }
+
+    if (conf.fullRoute.length === 0) {
+      conf.fullRoute = createFullRoute(
+        this.controllers[controllerIdx].prefix,
+        conf.route
+      )
+      this.swarm.log('debug', `${method.name} full route is: ${conf.fullRoute}`)
+    }
+
     let added = false
     this.controllers[controllerIdx].methods = this.controllers[
       controllerIdx
@@ -297,16 +313,20 @@ export class Controllers {
     method: SwarmMethod
   ) {
     return async (request: FastifyRequest, reply: FastifyReply) => {
+      request = await this.swarm.hooks.run('preAccess', request)
       if (controller.access !== null || method.access !== null)
         checkAccess(
           request,
           method.access !== null ? method.access : controller.access
         )
+      await this.swarm.hooks.run('postAccess')
 
-      const startDate = +new Date()
-      const response = await method.instance(request, reply)
-      const endDate = +new Date()
-      this.swarm.monitor.saveData(controller, method, endDate - startDate)
+      let hookState = { request, controller, method }
+      hookState = await this.swarm.hooks.run('preHandler', hookState)
+      let response = await method.instance(request, reply)
+      await this.swarm.hooks.run('postHandler', hookState)
+      response = await this.swarm.hooks.run('preResponse', response)
+
       return response
     }
   }

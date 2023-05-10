@@ -1,18 +1,16 @@
 import fastify, { FastifyInstance, FastifyRequest } from 'fastify'
 import { SwarmOptions, SwarmScopes } from './interfaces'
-import Monitoring from './controllers/Monitoring'
 import { createUserAccessMiddleware } from './middlewares/populateUserAccess'
 import { getErrorMessage } from './tools/error'
-import Swagger from './controllers/Swagger'
 import path from 'path'
-import { Monitor } from './Monitor'
 import { Schemas } from './Schemas'
 import { Controllers } from './Controllers'
+import { Hooks } from './Hooks'
+import { checkAccess as doCheckAccess } from './tools/acl'
 const main = require('require-main-filename')()
 
 declare module 'fastify' {
   interface FastifyRequest {
-    // you must reference the interface and not the type
     userAccess: string[]
   }
 }
@@ -22,8 +20,6 @@ export class Swarm {
   options: SwarmOptions = {
     logLevel: 'error',
     getUserAccess: (_: FastifyRequest) => null,
-    monitor: false,
-    monitorAccess: [],
     prefix: '/',
     schemasFolder: './schemas',
     defaultVersion: 'v1',
@@ -44,9 +40,9 @@ export class Swarm {
     oauth2TokenUrl: null,
     oauth2Scopes: {}
   }
-  monitor: Monitor
   schemas: Schemas
   controllers: Controllers
+  hooks: Hooks
 
   constructor (conf: Partial<SwarmOptions>) {
     this.options = {
@@ -56,11 +52,9 @@ export class Swarm {
     this.fastifyInstance = fastify({
       logger: true
     })
-    this.monitor = new Monitor(this)
     this.schemas = new Schemas(this)
     this.controllers = new Controllers(this)
-    Monitoring.init(this)
-    Swagger.init(this)
+    this.hooks = new Hooks(this)
   }
 
   get fastify () {
@@ -91,6 +85,13 @@ export class Swarm {
       return
 
     console.log(`[Swarm][${level}]`, content)
+  }
+
+  checkAccess (
+    request: FastifyRequest,
+    requiredAccess: string | string[] | null = null
+  ): void {
+    doCheckAccess(request, requiredAccess)
   }
 
   addServer (url: string, description: string = '') {
@@ -182,28 +183,24 @@ export class Swarm {
       createUserAccessMiddleware(this.options.getUserAccess)
     )
 
-    // Add documentation route
-    this.fastifyInstance.register(require('@fastify/static'), {
-      root: require('swagger-ui-dist').getAbsoluteFSPath(),
-      prefix: '/swagger'
-    })
-    this.controllers.add(Swagger)
-
-    // Add monitor route
-    if (this.options.monitor) {
-      this.controllers.add(Monitoring)
-    }
-
     // Register found controllers
+    await this.hooks.run('preRegister')
     this.controllers.register()
+    await this.hooks.run('postRegister')
 
+    await this.hooks.run('preListen')
     // Open connection
     try {
       await this.fastifyInstance.listen({ port, host })
+      await this.hooks.run('postListen')
       this.log('info', `Listening to ${host}:${port}`)
     } catch (err) {
       console.log(`Cannot listen to ${host}:${port}: ${getErrorMessage(err)}`)
       process.exit(1)
     }
+  }
+
+  use (plugin: any, options: any = {}): void {
+    plugin.setup(this, options)
   }
 }
