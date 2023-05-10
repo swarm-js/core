@@ -9,7 +9,7 @@ import {
   Returns,
   Title,
   Version
-} from '@swarmjs/decorators'
+} from '../lib/decorators'
 import { Swarm } from '../'
 
 @Title('Users')
