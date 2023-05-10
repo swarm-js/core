@@ -103,4 +103,4 @@ Distributed under the MIT License. See [LICENSE](https://github.com/swarm-js/cor
 
 ## Authors
 
-- [Guillaume Gagnaire](https://github.com/guillaume-gagnaire) - _CTO @ Smart Moov_
+- [Guillaume Gagnaire](https://github.com/guillaume-gagnaire)
