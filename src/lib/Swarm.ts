@@ -61,6 +61,14 @@ export class Swarm {
     return this.fastifyInstance
   }
 
+  getOption (key: keyof SwarmOptions) {
+    return this.options[key]
+  }
+
+  setOption (key: keyof SwarmOptions, value: any) {
+    this.options[key] = value
+  }
+
   log (level: string, content: any) {
     if (
       level === 'error' &&
