@@ -4,6 +4,7 @@ import { SwarmServer } from './SwarmServer'
 export interface SwarmOptions {
   logLevel: string
   getUserAccess: any
+  baseUrl: string
   prefix: string
   schemasFolder: string
   defaultVersion: string

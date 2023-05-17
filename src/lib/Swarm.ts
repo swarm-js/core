@@ -21,6 +21,7 @@ export class Swarm {
     logLevel: 'error',
     getUserAccess: (_: FastifyRequest) => null,
     prefix: '/',
+    baseUrl: 'http://localhost:8080',
     schemasFolder: './schemas',
     defaultVersion: 'v1',
 
