@@ -51,7 +51,7 @@ export class Swarm {
       ...conf
     }
     this.fastifyInstance = fastify({
-      logger: true
+      logger: this.options.logLevel !== 'error'
     })
     this.schemas = new Schemas(this)
     this.controllers = new Controllers(this)
