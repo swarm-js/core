@@ -10,7 +10,6 @@ export interface SwarmOptions {
   defaultVersion: string
 
   // Related to Swagger documentation
-  documentationAccess: string | string[] | null
   servers: SwarmServer[]
   title: string
   description: string
@@ -31,4 +30,8 @@ export interface SwarmOptions {
   oauth2TokenUrl: null | string
   oauth2RefreshUrl: null | string
   oauth2Scopes: SwarmScopes
+
+  // I18n
+  defaultLanguage: string
+  languages: string[]
 }

@@ -7,11 +7,20 @@ import { Schemas } from './Schemas'
 import { Controllers } from './Controllers'
 import { Hooks } from './Hooks'
 import { checkAccess as doCheckAccess } from './tools/acl'
+import { I18n } from './I18n'
+import { populateLang } from './middlewares/populateLang'
 const main = require('require-main-filename')()
 
 declare module 'fastify' {
   interface FastifyRequest {
     userAccess: string[]
+    lang: string
+    $t: (
+      namespace: string,
+      lang: string,
+      text: string,
+      replacements?: { [key: string]: any }
+    ) => string
   }
 }
 
@@ -25,7 +34,6 @@ export class Swarm {
     schemasFolder: './schemas',
     defaultVersion: 'v1',
 
-    documentationAccess: null,
     servers: [],
     title: '',
     description: '',
@@ -39,11 +47,15 @@ export class Swarm {
     oauth2Flow: null,
     oauth2RefreshUrl: null,
     oauth2TokenUrl: null,
-    oauth2Scopes: {}
+    oauth2Scopes: {},
+
+    defaultLanguage: 'en',
+    languages: ['en']
   }
   schemas: Schemas
   controllers: Controllers
   hooks: Hooks
+  i18n: I18n
 
   constructor (conf: Partial<SwarmOptions>) {
     this.options = {
@@ -56,6 +68,7 @@ export class Swarm {
     this.schemas = new Schemas(this)
     this.controllers = new Controllers(this)
     this.hooks = new Hooks(this)
+    this.i18n = new I18n(this)
     process.env.SWARM_OPTIONS = JSON.stringify(this.options)
   }
 
@@ -185,6 +198,28 @@ export class Swarm {
 
     await this.schemas.loadDir(
       path.join(path.dirname(main), this.options.schemasFolder)
+    )
+
+    // Decorate fastify instance to handle I18n
+    const _this = this
+    this.fastifyInstance.decorateRequest('lang', this.options.defaultLanguage)
+    this.fastifyInstance.addHook('preHandler', populateLang(this.options))
+    this.fastifyInstance.decorateRequest(
+      '$t',
+      function (
+        namespace: string,
+        lang: string,
+        text: string,
+        replacements: { [key: string]: any } = {}
+      ) {
+        let str = _this.i18n.translate(namespace, lang, text)
+
+        for (let key in replacements) {
+          str = str.replace(new RegExp(`{${key}}`, 'g'), replacements[key])
+        }
+
+        return str
+      }
     )
 
     // Decorate fastify instance to handle ACL

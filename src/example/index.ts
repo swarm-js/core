@@ -27,6 +27,7 @@ class UsersController {
   @Version(['v1', 'v2'])
   static async login (request: FastifyRequest, reply: FastifyReply) {
     console.log(request, reply)
+    console.log(request.$t('test', request.lang, 'test'))
     return {
       status: 'ok'
     }
