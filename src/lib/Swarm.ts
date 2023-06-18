@@ -56,6 +56,7 @@ export class Swarm {
     this.schemas = new Schemas(this)
     this.controllers = new Controllers(this)
     this.hooks = new Hooks(this)
+    process.env.SWARM_OPTIONS = JSON.stringify(this.options)
   }
 
   get fastify () {
@@ -68,6 +69,7 @@ export class Swarm {
 
   setOption (key: keyof SwarmOptions, value: any) {
     this.options[key] = value
+    process.env.SWARM_OPTIONS = JSON.stringify(this.options)
   }
 
   log (level: string, content: any) {
