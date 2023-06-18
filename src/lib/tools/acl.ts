@@ -25,12 +25,10 @@ export function checkAccess(
   const params: any = request.params ?? {}
   requiredAccess = (requiredAccess as string[]).map((access: string) => {
     for (let key in params) {
-      access.replace(new RegExp(`{${key}}`, 'g'), params[key])
+      access = access.replace(new RegExp(`{${key}}`, 'g'), params[key])
     }
     return access
   })
-
-  console.log('checkAccess', request.userAccess, requiredAccess)
 
   // If the logged in user have access, we allow access
   for (const a of requiredAccess) {
