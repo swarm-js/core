@@ -5,6 +5,8 @@ export function checkAccess(
   request: FastifyRequest,
   requiredAccess: string | string[] | null = null
 ) {
+  console.log('checkAccess', request.userAccess, requiredAccess)
+
   // User is not logged (userAccess null) and we require auth (requiredAccess not null) -> We refuse access
   if (request.userAccess === null && requiredAccess !== null)
     throw new Forbidden()
