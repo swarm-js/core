@@ -9,7 +9,7 @@ export class I18n {
     this.swarm = instance
   }
 
-  addTranslations (namespace: string, langs: SwarmI18nNamespace) {
+  addTranslations (langs: SwarmI18nNamespace, namespace: string = 'app') {
     this.namespaces[namespace] = langs
   }
 

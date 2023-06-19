@@ -16,10 +16,10 @@ declare module 'fastify' {
     userAccess: string[]
     lang: string
     $t: (
-      namespace: string,
-      lang: string,
       text: string,
-      replacements?: { [key: string]: any }
+      replacements?: { [key: string]: any },
+      lang?: string,
+      namespace?: string
     ) => string
   }
 }
@@ -207,10 +207,10 @@ export class Swarm {
     this.fastifyInstance.decorateRequest(
       '$t',
       function (
-        namespace: string,
-        lang: string,
         text: string,
-        replacements: { [key: string]: any } = {}
+        replacements: { [key: string]: any } = {},
+        lang: string = 'defaultLang',
+        namespace: string = 'app'
       ) {
         let str = _this.i18n.translate(namespace, lang, text)
 
