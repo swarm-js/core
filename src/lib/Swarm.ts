@@ -212,6 +212,7 @@ export class Swarm {
         lang: string = 'defaultLang',
         namespace: string = 'app'
       ) {
+        console.log(this, this.lang)
         let str = _this.i18n.translate(namespace, lang, text)
 
         for (let key in replacements) {
