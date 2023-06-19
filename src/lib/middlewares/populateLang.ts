@@ -1,7 +1,7 @@
 import { SwarmOptions } from '../interfaces'
 
 export function populateLang (conf: SwarmOptions) {
-  return function (req: any) {
+  return async function (req: any) {
     const langs = (req.headers['accept-language'] ?? 'en')
       .split(',')
       .map((s: string) => s.split(';')[0].trim())

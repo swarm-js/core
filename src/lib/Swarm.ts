@@ -18,7 +18,7 @@ declare module 'fastify' {
     $t: (
       text: string,
       replacements?: { [key: string]: any },
-      lang?: string,
+      lang?: string | null,
       namespace?: string
     ) => string
   }
@@ -209,11 +209,10 @@ export class Swarm {
       function (
         text: string,
         replacements: { [key: string]: any } = {},
-        lang: string = 'defaultLang',
+        lang: string | null = null,
         namespace: string = 'app'
       ) {
-        console.log(this, this.lang)
-        let str = _this.i18n.translate(namespace, lang, text)
+        let str = _this.i18n.translate(namespace, lang ?? this.lang, text)
 
         for (let key in replacements) {
           str = str.replace(new RegExp(`{${key}}`, 'g'), replacements[key])
