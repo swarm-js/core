@@ -3,6 +3,7 @@ import { SwarmServer } from './SwarmServer'
 
 export interface SwarmOptions {
   logLevel: string
+  verbose: boolean
   getUserAccess: any
   baseUrl: string
   prefix: string
@@ -36,6 +37,7 @@ export interface SwarmOptions {
   languages: string[]
 
   // HTTPS
-  https: boolean
-  httpsOptions: { [key: string]: any }
+  http2: boolean
+  sslKeyPath: string
+  sslCertPath: string
 }

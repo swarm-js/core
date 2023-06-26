@@ -1,8 +1,15 @@
-import fastify, { FastifyInstance, FastifyRequest } from 'fastify'
+import fastify, {
+  FastifyBaseLogger,
+  FastifyHttpOptions,
+  FastifyInstance,
+  FastifyRequest,
+  RawServerDefault
+} from 'fastify'
 import { SwarmOptions, SwarmScopes } from './interfaces'
 import { createUserAccessMiddleware } from './middlewares/populateUserAccess'
 import { getErrorMessage } from './tools/error'
 import path from 'path'
+import fs from 'fs'
 import { Schemas } from './Schemas'
 import { Controllers } from './Controllers'
 import { Hooks } from './Hooks'
@@ -28,6 +35,7 @@ export class Swarm {
   private fastifyInstance: FastifyInstance
   options: SwarmOptions = {
     logLevel: 'error',
+    verbose: false,
     getUserAccess: (_: FastifyRequest) => null,
     prefix: '/',
     baseUrl: 'http://localhost:8080',
@@ -52,8 +60,9 @@ export class Swarm {
     defaultLanguage: 'en',
     languages: ['en'],
 
-    https: false,
-    httpsOptions: {}
+    http2: false,
+    sslKeyPath: '',
+    sslCertPath: ''
   }
   schemas: Schemas
   controllers: Controllers
@@ -66,9 +75,16 @@ export class Swarm {
       ...conf
     }
     this.fastifyInstance = fastify({
-      logger: this.options.logLevel !== 'error',
-      https: this.options.https ? this.options.httpsOptions : null
-    })
+      logger: this.options.verbose,
+      http2: this.options.http2,
+      https: this.options.http2
+        ? {
+            allowHTTP1: true,
+            key: fs.readFileSync(this.options.sslKeyPath),
+            cert: fs.readFileSync(this.options.sslCertPath)
+          }
+        : null
+    } as FastifyHttpOptions<RawServerDefault, FastifyBaseLogger>)
     this.schemas = new Schemas(this)
     this.controllers = new Controllers(this)
     this.hooks = new Hooks(this)
