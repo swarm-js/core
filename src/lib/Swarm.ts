@@ -50,7 +50,10 @@ export class Swarm {
     oauth2Scopes: {},
 
     defaultLanguage: 'en',
-    languages: ['en']
+    languages: ['en'],
+
+    https: false,
+    httpsOptions: {}
   }
   schemas: Schemas
   controllers: Controllers
@@ -63,7 +66,8 @@ export class Swarm {
       ...conf
     }
     this.fastifyInstance = fastify({
-      logger: this.options.logLevel !== 'error'
+      logger: this.options.logLevel !== 'error',
+      https: this.options.https ? this.options.httpsOptions : null
     })
     this.schemas = new Schemas(this)
     this.controllers = new Controllers(this)

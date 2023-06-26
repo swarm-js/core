@@ -34,4 +34,8 @@ export interface SwarmOptions {
   // I18n
   defaultLanguage: string
   languages: string[]
+
+  // HTTPS
+  https: boolean
+  httpsOptions: any
 }
