@@ -37,5 +37,5 @@ export interface SwarmOptions {
 
   // HTTPS
   https: boolean
-  httpsOptions: any
+  httpsOptions: { [key: string]: any }
 }

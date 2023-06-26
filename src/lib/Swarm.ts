@@ -85,7 +85,7 @@ export class Swarm {
   }
 
   setOption (key: keyof SwarmOptions, value: any) {
-    this.options[key] = value
+    ;(this.options as any)[key] = value
     process.env.SWARM_OPTIONS = JSON.stringify(this.options)
   }
 
