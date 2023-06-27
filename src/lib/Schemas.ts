@@ -50,7 +50,9 @@ export class Schemas {
         o[key] = this.refToSwagger(o[key])
       } else if (key === '$ref') {
         const ref = o[key].split('#')
-        o[key] = `#/components/schemas/${ref[0].replace(/\//g, '_')}${ref[1]}`
+        o[key] = `#/components/schemas/${ref[0].replace(/\//g, '_')}${
+          ref[1] ?? ''
+        }`
       }
     }
     return o
