@@ -87,10 +87,7 @@ export class Schemas {
         if (stat.isFile() && file.substring(file.length - 5) === '.json')
           await this.load(
             filepath,
-            `${prefix.length ? prefix + '/' : ''}${file.substring(
-              0,
-              file.length - 5
-            )}`
+            `${prefix.length ? prefix + '/' : ''}${file}`
           )
         else if (stat.isDirectory()) {
           await this.loadDir(
