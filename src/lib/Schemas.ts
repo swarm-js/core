@@ -21,7 +21,7 @@ export class Schemas {
   getSwaggerComponents () {
     return Object.fromEntries(
       Object.entries(this.schemas).map((s: any) => [
-        s[0].replace(/\//g, '_'),
+        s[0].replace(/\//g, '_').replace('.json', ''),
         s[1]
       ])
     )
