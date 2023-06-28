@@ -1,3 +1,4 @@
+import { SwarmInjector } from './SwarmInjector'
 import { SwarmScopes } from './SwarmScopes'
 import { SwarmServer } from './SwarmServer'
 
@@ -40,4 +41,7 @@ export interface SwarmOptions {
   http2: boolean
   sslKeyPath: string
   sslCertPath: string
+
+  // Parameter injection
+  injectors: SwarmInjector[]
 }

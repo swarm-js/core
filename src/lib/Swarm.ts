@@ -33,37 +33,7 @@ declare module 'fastify' {
 
 export class Swarm {
   private fastifyInstance: FastifyInstance
-  options: SwarmOptions = {
-    logLevel: 'error',
-    verbose: false,
-    getUserAccess: (_: FastifyRequest) => null,
-    prefix: '/',
-    baseUrl: 'http://localhost:8080',
-    schemasFolder: './schemas',
-    defaultVersion: 'v1',
-
-    servers: [],
-    title: '',
-    description: '',
-
-    authType: null,
-    apiKeyLocation: null,
-    apiKeyName: null,
-    bearerFormat: 'JWT',
-    openIdConnectUrl: null,
-    oauth2AuthorizationUrl: null,
-    oauth2Flow: null,
-    oauth2RefreshUrl: null,
-    oauth2TokenUrl: null,
-    oauth2Scopes: {},
-
-    defaultLanguage: 'en',
-    languages: ['en'],
-
-    http2: false,
-    sslKeyPath: '',
-    sslCertPath: ''
-  }
+  options: SwarmOptions
   schemas: Schemas
   controllers: Controllers
   hooks: Hooks
@@ -71,7 +41,38 @@ export class Swarm {
 
   constructor (conf: Partial<SwarmOptions>) {
     this.options = {
-      ...this.options,
+      logLevel: 'error',
+      verbose: false,
+      getUserAccess: (_: FastifyRequest) => null,
+      prefix: '/',
+      baseUrl: 'http://localhost:8080',
+      schemasFolder: './schemas',
+      defaultVersion: 'v1',
+
+      servers: [],
+      title: '',
+      description: '',
+
+      authType: null,
+      apiKeyLocation: null,
+      apiKeyName: null,
+      bearerFormat: 'JWT',
+      openIdConnectUrl: null,
+      oauth2AuthorizationUrl: null,
+      oauth2Flow: null,
+      oauth2RefreshUrl: null,
+      oauth2TokenUrl: null,
+      oauth2Scopes: {},
+
+      defaultLanguage: 'en',
+      languages: ['en'],
+
+      http2: false,
+      sslKeyPath: '',
+      sslCertPath: '',
+
+      injectors: [],
+
       ...conf
     }
     this.fastifyInstance = fastify({
@@ -102,6 +103,11 @@ export class Swarm {
 
   setOption (key: keyof SwarmOptions, value: any) {
     ;(this.options as any)[key] = value
+    process.env.SWARM_OPTIONS = JSON.stringify(this.options)
+  }
+
+  appendOption (key: keyof SwarmOptions, value: any) {
+    this.options[key].push(value)
     process.env.SWARM_OPTIONS = JSON.stringify(this.options)
   }
 

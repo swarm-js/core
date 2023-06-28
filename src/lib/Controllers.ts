@@ -3,6 +3,7 @@ import { SwarmArgument, SwarmController, SwarmMethod } from './interfaces'
 import { Swarm } from './Swarm'
 import { checkAccess } from './tools/acl'
 import { createFullRoute } from './tools/path'
+import { SwarmInjector } from './interfaces/SwarmInjector'
 
 export class Controllers {
   swarm: Swarm
@@ -355,6 +356,12 @@ export class Controllers {
           ret[arg.idx] = (arg.key ?? '').length
             ? request.params[arg.key ?? '']
             : request.params
+          break
+        default:
+          const injector = this.swarm
+            .getOption('injectors')
+            .find((i: SwarmInjector) => i.name === arg.type)
+          if (injector) ret[arg.idx] = injector.getValue(request) ?? undefined
           break
       }
     }
