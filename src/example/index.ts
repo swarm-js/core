@@ -1,7 +1,8 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
 import {
   Accepts,
+  Body,
   Description,
+  Header,
   Post,
   Prefix,
   Query,
@@ -23,9 +24,12 @@ class UsersController {
   @Returns(200, 'JWT', 'A JWT token used to authenticate user requests')
   @Returns(403, 'Error', 'Credentials are invalid')
   @Version(['v1', 'v2'])
-  static async login (request: FastifyRequest, reply: FastifyReply) {
-    console.log(request, reply)
-    console.log(request.$t('test'))
+  static async login (
+    @Body() data: any,
+    @Body('email') email: any,
+    @Header('content-type') contentType: string
+  ) {
+    console.log(data, email, contentType)
     return {
       status: 'ok'
     }

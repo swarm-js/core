@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest, HTTPMethods } from 'fastify'
-import { SwarmController, SwarmMethod } from './interfaces'
+import { SwarmArgument, SwarmController, SwarmMethod } from './interfaces'
 import { Swarm } from './Swarm'
 import { checkAccess } from './tools/acl'
 import { createFullRoute } from './tools/path'
@@ -72,8 +72,16 @@ export class Controllers {
       parameters: [],
       query: [],
       version: [],
+      args: [],
       ...options
     }
+
+    // If no args, add request and response
+    if (conf.args.length === 0)
+      conf.args = [
+        { idx: 0, type: 'request' },
+        { idx: 1, type: 'response' }
+      ]
 
     // If no version is configured, take versions from the controller
     if (conf.version.length === 0)
@@ -231,7 +239,8 @@ export class Controllers {
       returns: [],
       parameters: [],
       query: [],
-      version: []
+      version: [],
+      args: []
     }
 
     // Apply method options
@@ -250,6 +259,10 @@ export class Controllers {
     if (prototype.description !== undefined) {
       ret.description = prototype.description
       this.swarm.log('debug', `${name}: found description: ${ret.description}`)
+    }
+    if (prototype.args !== undefined) {
+      ret.args = prototype.args
+      this.swarm.log('debug', `${name}: found args: ${ret.args}`)
     }
     if (prototype.version !== undefined) {
       ret.version = prototype.version
@@ -308,6 +321,47 @@ export class Controllers {
     return ret
   }
 
+  private createMethodArgs(
+    method: SwarmMethod,
+    request: any,
+    reply: FastifyReply
+  ) {
+    const maxIdx = Math.max(...method.args.map((a: SwarmArgument) => a.idx))
+    const ret = Array(maxIdx + 1)
+    for (let arg of method.args) {
+      switch (arg.type) {
+        case 'body':
+          ret[arg.idx] = (arg.key ?? '').length
+            ? request.body[arg.key ?? '']
+            : request.body
+          break
+        case 'query':
+          ret[arg.idx] = (arg.key ?? '').length
+            ? request.query[arg.key ?? '']
+            : request.query
+          break
+        case 'request':
+          ret[arg.idx] = request
+          break
+        case 'response':
+          ret[arg.idx] = reply
+          break
+        case 'headers':
+          ret[arg.idx] = (arg.key ?? '').length
+            ? request.headers[arg.key ?? '']
+            : request.headers
+          break
+        case 'params':
+          ret[arg.idx] = (arg.key ?? '').length
+            ? request.params[arg.key ?? '']
+            : request.params
+          break
+      }
+    }
+
+    return ret
+  }
+
   private createHandlerForMethod(
     controller: SwarmController,
     method: SwarmMethod
@@ -323,7 +377,10 @@ export class Controllers {
 
       let hookState = { request, controller, method }
       hookState = await this.swarm.hooks.run('preHandler', hookState)
-      let response = await method.instance(request, reply)
+
+      let response = await method.instance(
+        ...this.createMethodArgs(method, request, reply)
+      )
       await this.swarm.hooks.run('postHandler', hookState)
       response = await this.swarm.hooks.run('preResponse', response)
 

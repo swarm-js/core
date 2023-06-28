@@ -1,3 +1,4 @@
+import { SwarmArgument } from './SwarmArgument'
 import { SwarmParameter } from './SwarmParameter'
 import { SwarmQuery } from './SwarmQuery'
 import { SwarmReturn } from './SwarmReturn'
@@ -16,4 +17,5 @@ export interface SwarmMethod {
   parameters: SwarmParameter[]
   query: SwarmQuery[]
   version: string[]
+  args: SwarmArgument[]
 }
