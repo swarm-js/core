@@ -31,7 +31,7 @@ export class Schemas {
    * $ref : when using shared schema in fastify, user can use the following syntax:
    *
    * {
-   *   $ref: 'MySchema#/properties/foo'
+   *   $ref: 'MySchema.json#/properties/foo'
    * }
    *
    * For Swagger, we need to transform them into :
@@ -50,9 +50,9 @@ export class Schemas {
         o[key] = this.refToSwagger(o[key])
       } else if (key === '$ref') {
         const ref = o[key].split('#')
-        o[key] = `#/components/schemas/${ref[0].replace(/\//g, '_')}${
-          ref[1] ?? ''
-        }`
+        o[key] = `#/components/schemas/${ref[0]
+          .replace(/\//g, '_')
+          .replace('.json', '')}${ref[1] ?? ''}`
       }
     }
     return o
