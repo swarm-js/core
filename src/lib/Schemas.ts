@@ -108,7 +108,7 @@ export class Schemas {
       let accepts = method.accepts.schema
       if (accepts instanceof Array === false) accepts = [accepts]
       accepts = accepts.map((a: any) =>
-        typeof a === 'string' ? { $ref: `${a}#` } : a
+        typeof a === 'string' ? { $ref: `${a}.json#` } : a
       )
 
       switch (accepts.length) {
@@ -132,7 +132,7 @@ export class Schemas {
       .map((param: SwarmParameter) => [
         param.name,
         typeof param.schema === 'string'
-          ? { $ref: `${param.schema}#` }
+          ? { $ref: `${param.schema}.json#` }
           : param.schema
       ])
       .filter(a => [null, undefined].includes(a[1]) !== true)
@@ -146,7 +146,7 @@ export class Schemas {
       .map((query: SwarmQuery) => [
         query.name,
         typeof query.schema === 'string'
-          ? { $ref: `${query.schema}#` }
+          ? { $ref: `${query.schema}.json#` }
           : query.schema
       ])
       .filter(a => [null, undefined].includes(a[1]) !== true)
@@ -159,7 +159,9 @@ export class Schemas {
     const returns = method.returns
       .map((ret: SwarmReturn) => [
         ret.code,
-        typeof ret.schema === 'string' ? { $ref: `${ret.schema}#` } : ret.schema
+        typeof ret.schema === 'string'
+          ? { $ref: `${ret.schema}.json#` }
+          : ret.schema
       ])
       .filter(a => [null, undefined].includes(a[1]) !== true)
     if (returns.length) schema.response = Object.fromEntries(returns)
