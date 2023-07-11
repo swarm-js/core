@@ -336,6 +336,9 @@ export class Controllers {
             ? request.body[arg.key ?? '']
             : request.body
           break
+        case 'rawbody':
+          ret[arg.idx] = request.rawBody
+          break
         case 'query':
           ret[arg.idx] = (arg.key ?? '').length
             ? request.query[arg.key ?? '']
