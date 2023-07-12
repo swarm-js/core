@@ -229,7 +229,7 @@ export class Swarm {
     )
 
     // Add raw body parser
-    this.fastifyInstance.register(fastifyRawBody)
+    await this.fastifyInstance.register(fastifyRawBody)
 
     // Decorate fastify instance to handle I18n
     const _this = this
