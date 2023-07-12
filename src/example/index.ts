@@ -1,11 +1,12 @@
 import {
-  Accepts,
   Body,
   Description,
   Header,
   Post,
   Prefix,
   Query,
+  RawBody,
+  Req,
   Returns,
   Title,
   Version
@@ -19,17 +20,17 @@ class UsersController {
   @Title('Login a user')
   @Description('Validates user credentials and returns a JWT token')
   @Post('/login')
-  @Accepts('Login')
   @Query('source', { type: 'string' }, 'Auth source')
   @Returns(200, 'JWT', 'A JWT token used to authenticate user requests')
   @Returns(403, 'Error', 'Credentials are invalid')
   @Version(['v1', 'v2'])
+  @RawBody()
   static async login (
-    @Body() data: any,
+    @Req() req: any,
     @Body('email') email: any,
     @Header('content-type') contentType: string
   ) {
-    console.log(data, email, contentType)
+    console.log(req.body, email, contentType)
     return {
       status: 'ok'
     }
@@ -46,4 +47,4 @@ const app = new Swarm({
 
 app.controllers.add(UsersController)
 
-app.listen(8080)
+app.listen(8081)

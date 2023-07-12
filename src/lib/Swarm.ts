@@ -16,7 +16,6 @@ import { Hooks } from './Hooks'
 import { checkAccess as doCheckAccess } from './tools/acl'
 import { I18n } from './I18n'
 import { populateLang } from './middlewares/populateLang'
-import fastifyRawBody from 'fastify-raw-body'
 
 const main = require('require-main-filename')()
 
@@ -227,9 +226,6 @@ export class Swarm {
     await this.schemas.loadDir(
       path.join(path.dirname(main), this.options.schemasFolder)
     )
-
-    // Add raw body parser
-    await this.fastifyInstance.register(fastifyRawBody)
 
     // Decorate fastify instance to handle I18n
     const _this = this

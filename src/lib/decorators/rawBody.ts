@@ -1,10 +1,10 @@
 /**
- * Decorator to add the raw request body to the method parameter
+ * Decorator to avoid fastify to parse body from JSON
  *
  * @returns       The decorator function.
  */
 export function RawBody (): any {
-  return (target: any, propertyKey: string, parameterIndex: number): void => {
+  return (target: any, propertyKey: string): void => {
     if (!propertyKey) return
 
     if (target.prototype.swarm === undefined) target.prototype.swarm = {}
@@ -12,12 +12,7 @@ export function RawBody (): any {
       target.prototype.swarm.methods = {}
     if (target.prototype.swarm.methods[propertyKey] === undefined)
       target.prototype.swarm.methods[propertyKey] = {}
-    if (target.prototype.swarm.methods[propertyKey].args === undefined)
-      target.prototype.swarm.methods[propertyKey].args = []
-    target.prototype.swarm.methods[propertyKey].args.push({
-      idx: parameterIndex,
-      type: 'rawbody',
-      key: ''
-    })
+
+    target.prototype.swarm.methods[propertyKey].rawBody = true
   }
 }

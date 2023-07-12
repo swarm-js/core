@@ -18,4 +18,5 @@ export interface SwarmMethod {
   query: SwarmQuery[]
   version: string[]
   args: SwarmArgument[]
+  rawBody: boolean
 }

@@ -74,6 +74,7 @@ export class Controllers {
       query: [],
       version: [],
       args: [],
+      rawBody: false,
       ...options
     }
 
@@ -241,7 +242,8 @@ export class Controllers {
       parameters: [],
       query: [],
       version: [],
-      args: []
+      args: [],
+      rawBody: false
     }
 
     // Apply method options
@@ -260,6 +262,10 @@ export class Controllers {
     if (prototype.description !== undefined) {
       ret.description = prototype.description
       this.swarm.log('debug', `${name}: found description: ${ret.description}`)
+    }
+    if (prototype.rawBody !== undefined) {
+      ret.rawBody = prototype.rawBody
+      this.swarm.log('debug', `${name}: found rawBody: ${ret.rawBody}`)
     }
     if (prototype.args !== undefined) {
       ret.args = prototype.args
@@ -408,13 +414,30 @@ export class Controllers {
         for (let version of method.version) {
           const schema: any = this.swarm.schemas.generate(controller, method)
 
-          this.swarm.fastify.route({
-            method: <HTTPMethods>method.method,
-            url: controller.root
-              ? method.fullRoute
-              : `/${version}${method.fullRoute}`,
-            schema,
-            handler: this.createHandlerForMethod(controller, method)
+          this.swarm.fastify.register((plugin: any, _: any, next: any) => {
+            if (method.rawBody) {
+              plugin.addContentTypeParser(
+                'application/json',
+                { parseAs: 'buffer' },
+                function (_: any, body: any, done: any) {
+                  try {
+                    done(null, body)
+                  } catch (error: any) {
+                    error.statusCode = 400
+                    done(error, undefined)
+                  }
+                }
+              )
+            }
+            plugin.route({
+              method: <HTTPMethods>method.method,
+              url: controller.root
+                ? method.fullRoute
+                : `/${version}${method.fullRoute}`,
+              schema,
+              handler: this.createHandlerForMethod(controller, method)
+            })
+            next()
           })
           this.swarm.log(
             'info',
