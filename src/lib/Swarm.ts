@@ -16,6 +16,7 @@ import { Hooks } from './Hooks'
 import { checkAccess as doCheckAccess } from './tools/acl'
 import { I18n } from './I18n'
 import { populateLang } from './middlewares/populateLang'
+import SwarmHealthController from './controllers/SwarmHealthController'
 
 const main = require('require-main-filename')()
 
@@ -39,6 +40,7 @@ export class Swarm {
   controllers: Controllers
   hooks: Hooks
   i18n: I18n
+  isShutingDown: boolean
 
   constructor (conf: Partial<SwarmOptions>) {
     this.options = {
@@ -92,6 +94,10 @@ export class Swarm {
     this.hooks = new Hooks(this)
     this.i18n = new I18n(this)
     process.env.SWARM_OPTIONS = JSON.stringify(this.options)
+
+    // Handle health
+    this.isShutingDown = false
+    this.controllers.add(SwarmHealthController)
   }
 
   get fastify () {

@@ -4,6 +4,7 @@ import { Swarm } from './Swarm'
 import { checkAccess } from './tools/acl'
 import { createFullRoute } from './tools/path'
 import { SwarmInjector } from './interfaces/SwarmInjector'
+import { InternalServerError } from 'http-errors'
 
 export class Controllers {
   swarm: Swarm
@@ -383,6 +384,8 @@ export class Controllers {
     method: SwarmMethod
   ) {
     return async (request: FastifyRequest, reply: FastifyReply) => {
+      if (this.swarm.isShutingDown) throw new InternalServerError()
+
       request = await this.swarm.hooks.run('preAccess', request)
       if (controller.access !== null || method.access !== null)
         checkAccess(

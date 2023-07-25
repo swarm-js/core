@@ -10,6 +10,7 @@ export class Hooks {
 
     process.on('SIGTERM', async () => {
       instance.log('info', 'Got SIGTERM. Graceful shutdown start')
+      instance.isShutingDown = true
       await this.run('preShutdown')
       instance.log('info', 'All preShutdown hooks done, now shutdown')
       process.exit()
