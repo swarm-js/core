@@ -8,3 +8,4 @@ export type SwarmHook =
   | 'preHandler'
   | 'postHandler'
   | 'preResponse'
+  | 'preShutdown'

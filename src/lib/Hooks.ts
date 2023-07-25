@@ -7,6 +7,13 @@ export class Hooks {
 
   constructor (instance: Swarm) {
     this.swarm = instance
+
+    process.on('SIGTERM', async () => {
+      instance.log('info', 'Got SIGTERM. Graceful shutdown start')
+      await this.run('preShutdown')
+      instance.log('info', 'All preShutdown hooks done, now shutdown')
+      process.exit()
+    })
   }
 
   add (hook: SwarmHook, handler: any): void {
