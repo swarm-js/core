@@ -1,5 +1,6 @@
 import { SwarmHook } from './interfaces'
 import { Swarm } from './Swarm'
+import exitHook from 'async-exit-hook'
 
 export class Hooks {
   swarm: Swarm
@@ -8,12 +9,12 @@ export class Hooks {
   constructor (instance: Swarm) {
     this.swarm = instance
 
-    process.on('SIGTERM', async () => {
+    exitHook(async (callback: any) => {
       instance.log('info', 'Got SIGTERM. Graceful shutdown start')
       instance.isShutingDown = true
       await this.run('preShutdown')
       instance.log('info', 'All preShutdown hooks done, now shutdown')
-      process.exit()
+      callback()
     })
   }
 

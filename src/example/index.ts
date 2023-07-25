@@ -47,4 +47,14 @@ const app = new Swarm({
 
 app.controllers.add(UsersController)
 
+app.hooks.add('preShutdown', async () => {
+  console.log('Hook start')
+  await new Promise((res: any) => {
+    setTimeout(_ => {
+      res()
+    }, 5000)
+  })
+  console.log('Hook done')
+})
+
 app.listen(8081)
