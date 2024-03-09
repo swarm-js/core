@@ -1,3 +1,4 @@
+import { ServerOptions } from 'socket.io'
 import { SwarmInjector } from './SwarmInjector'
 import { SwarmScopes } from './SwarmScopes'
 import { SwarmServer } from './SwarmServer'
@@ -46,5 +47,6 @@ export interface SwarmOptions {
   injectors: SwarmInjector[]
 
   // Socket.io
-  socketOnConnection: ((socket: any, eventBus?: any) => void)[]
+  socketOnConnection: ((socket: any, eventBus?: any) => void)[],
+  socketIoOptions: Partial<ServerOptions>
 }
