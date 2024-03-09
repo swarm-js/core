@@ -17,7 +17,7 @@ import { checkAccess as doCheckAccess } from './tools/acl'
 import { I18n } from './I18n'
 import { populateLang } from './middlewares/populateLang'
 import SwarmHealthController from './controllers/SwarmHealthController'
-import { Server, ServerOptions } from 'socket.io'
+import { Server } from 'socket.io'
 import fastifySocketIO from 'fastify-socket.io'
 import { Socket } from './Socket'
 
