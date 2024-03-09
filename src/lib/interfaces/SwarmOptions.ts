@@ -46,5 +46,5 @@ export interface SwarmOptions {
   injectors: SwarmInjector[]
 
   // Socket.io
-  socketOnConnection: ((socket: any) => void)[]
+  socketOnConnection: ((socket: any, eventBus?: any) => void)[]
 }
