@@ -10,7 +10,7 @@ export class Socket {
     ioInstance = io
     io.on('connection', async (socket: any) => {
       for (let cb of swarm.getOption('socketOnConnection')) {
-        await cb(socket)
+        await cb(socket, bus)
       }
     })
   }
