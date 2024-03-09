@@ -13,7 +13,7 @@ export class Socket {
     })
   }
 
-  get io (): Server {
+  static get io (): Server {
     return ioInstance as Server
   }
 }
