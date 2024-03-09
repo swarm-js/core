@@ -17,6 +17,9 @@ import { checkAccess as doCheckAccess } from './tools/acl'
 import { I18n } from './I18n'
 import { populateLang } from './middlewares/populateLang'
 import SwarmHealthController from './controllers/SwarmHealthController'
+import { Server } from 'socket.io'
+import fastifySocketIO from 'fastify-socket.io'
+import { Socket } from './Socket'
 
 const main = require('require-main-filename')()
 
@@ -30,6 +33,10 @@ declare module 'fastify' {
       lang?: string | null,
       namespace?: string
     ) => string
+  }
+
+  interface FastifyInstance {
+    io: Server
   }
 }
 
@@ -76,6 +83,8 @@ export class Swarm {
 
       injectors: [],
 
+      socketOnConnection: [],
+
       ...conf
     }
     this.fastifyInstance = fastify({
@@ -95,9 +104,16 @@ export class Swarm {
     this.i18n = new I18n(this)
     process.env.SWARM_OPTIONS = JSON.stringify(this.options)
 
+    // Socket.io
+    this.fastifyInstance.register(fastifySocketIO)
+
     // Handle health
     this.isShutingDown = false
     this.controllers.add(SwarmHealthController)
+  }
+
+  onSocketConnection (cb: (socket: any) => void) {
+    this.options.socketOnConnection.push(cb)
   }
 
   get fastify () {
@@ -271,6 +287,7 @@ export class Swarm {
     // Open connection
     try {
       await this.fastifyInstance.listen({ port, host })
+      Socket.setup(this, this.fastifyInstance.io)
       await this.hooks.run('postListen')
       this.log('info', `Listening to ${host}:${port}`)
     } catch (err) {
