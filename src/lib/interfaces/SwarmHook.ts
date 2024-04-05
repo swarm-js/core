@@ -9,3 +9,4 @@ export type SwarmHook =
   | 'postHandler'
   | 'preResponse'
   | 'preShutdown'
+  | 'onError'

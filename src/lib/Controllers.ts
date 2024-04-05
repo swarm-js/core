@@ -394,12 +394,19 @@ export class Controllers {
         )
       await this.swarm.hooks.run('postAccess')
 
-      let hookState = { request, controller, method }
+      let hookState: any = { request, controller, method }
       hookState = await this.swarm.hooks.run('preHandler', hookState)
 
-      let response = await method.instance(
-        ...this.createMethodArgs(method, request, reply)
-      )
+      let response = null
+      try {
+        response = await method.instance(
+          ...this.createMethodArgs(method, request, reply)
+        )
+      } catch (err: any) {
+        hookState.error = err
+        await this.swarm.hooks.run('onError', hookState)
+        throw err
+      }
       await this.swarm.hooks.run('postHandler', hookState)
       response = await this.swarm.hooks.run('preResponse', response)
 
