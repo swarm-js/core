@@ -102,7 +102,10 @@ export class Swarm {
             key: fs.readFileSync(this.options.sslKeyPath),
             cert: fs.readFileSync(this.options.sslCertPath)
           }
-        : null
+        : null,
+      ajv: {
+        plugins: [require('ajv-formats')]
+      }
     } as FastifyHttpOptions<RawServerDefault, FastifyBaseLogger>)
     this.schemas = new Schemas(this)
     this.controllers = new Controllers(this)
