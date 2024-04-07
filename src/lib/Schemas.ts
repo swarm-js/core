@@ -62,12 +62,23 @@ export class Schemas {
     return this.schemas[name]
   }
 
-  async load (path: string, name: string) {
+  async loadFile (path: string, name: string) {
     try {
       const content: string = await fs.readFile(path, { encoding: 'utf8' })
-      this.schemas[name] = this.refToSwagger(JSON.parse(content))
+      await this.loadSchema(JSON.parse(content), name)
+    } catch (err: any) {
+      this.swarm.log(
+        'error',
+        `Cannot load schema ${path}: ${getErrorMessage(err)}`
+      )
+    }
+  }
+
+  async loadSchema (content: { [key: string]: any }, name: string) {
+    try {
+      this.schemas[name] = this.refToSwagger(content)
       this.swarm.log('info', `Found schema ${name}`)
-      const fastifySchema = JSON.parse(content)
+      const fastifySchema = content
       fastifySchema.$id = name
       this.swarm.fastify.addSchema(fastifySchema)
     } catch (err: any) {
@@ -85,7 +96,7 @@ export class Schemas {
         const filepath: string = path.join(dir, file)
         const stat = await fs.lstat(filepath)
         if (stat.isFile() && file.substring(file.length - 5) === '.json')
-          await this.load(
+          await this.loadFile(
             filepath,
             `${prefix.length ? prefix + '/' : ''}${file}`
           )
