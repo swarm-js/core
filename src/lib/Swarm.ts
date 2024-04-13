@@ -121,7 +121,7 @@ export class Swarm {
     this.controllers.add(SwarmHealthController)
   }
 
-  onSocketConnection (cb: (socket: any) => void) {
+  onSocketConnection (cb: (socket: any, eventBus?: any) => void) {
     this.options.socketOnConnection.push(cb)
   }
 
