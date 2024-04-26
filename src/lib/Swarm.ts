@@ -59,6 +59,8 @@ export class Swarm {
       schemasFolder: './schemas',
       defaultVersion: 'v1',
 
+      bodyLimit: 1048576,
+
       servers: [],
       title: '',
       description: '',
@@ -105,7 +107,8 @@ export class Swarm {
         : null,
       ajv: {
         plugins: [require('ajv-formats')]
-      }
+      },
+      bodyLimit: this.options.bodyLimit
     } as FastifyHttpOptions<RawServerDefault, FastifyBaseLogger>)
     this.schemas = new Schemas(this)
     this.controllers = new Controllers(this)

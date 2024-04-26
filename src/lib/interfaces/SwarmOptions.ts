@@ -12,6 +12,8 @@ export interface SwarmOptions {
   schemasFolder: string
   defaultVersion: string
 
+  bodyLimit: number
+
   // Related to Swagger documentation
   servers: SwarmServer[]
   title: string
@@ -47,6 +49,6 @@ export interface SwarmOptions {
   injectors: SwarmInjector[]
 
   // Socket.io
-  socketOnConnection: ((socket: any, eventBus?: any) => void)[],
+  socketOnConnection: ((socket: any, eventBus?: any) => void)[]
   socketIoOptions: Partial<ServerOptions>
 }
