@@ -258,7 +258,7 @@ export class Swarm {
     if (this.fastifyInstance === null) return
 
     await this.schemas.loadDir(
-      path.join(path.dirname(main), this.options.schemasFolder)
+      path.resolve(path.dirname(main), this.options.schemasFolder)
     )
 
     // Decorate fastify instance to handle I18n
