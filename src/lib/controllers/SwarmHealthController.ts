@@ -1,7 +1,8 @@
-import { Get, Prefix, Returns, Title } from '../decorators'
+import { Description, Get, Prefix, Returns, Title } from '../decorators'
 
 @Prefix('/health', true)
-@Title('Adds a health check endpoint')
+@Title('Healthcheck')
+@Description('Adds a health check endpoint')
 export default class SwarmHealthController {
   @Get('/')
   @Title('Is the API healthy ?')
